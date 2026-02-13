@@ -9,8 +9,8 @@ MISP Threat Sharing (MISP), is an open source threat intelligence platform that 
 I created the ***get-indicators-from-otx.py*** script to reduce the amount of false positive management I was having to do on my OTX threat feed data.  ***get-indicators-from-otx.py*** fetches domain/hostname (an optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator for false positives by:
 1. Checking whether the indicator has been whitelisted in OTX. If it is, it does not add it into MISP
 2. Calculating the most recent date/time (highest unix tz) from the following indicator metrics: 
-    - The most recent date/time it was observed in passive_dns
-    - The most recent date/time it was observed in url_list
+    - The most recent date/time observed in passive_dns
+    - The most recent date/time observed in url_list
     - The creation date/time of the indicator in the pulse
 3. Checking whether the date/time (from above) is newer than the decay model lifetime date/time. If it is, it imports the indicator into MISP as a new attribute, or adds a sighting if the attribute exists in MISP already.
 
