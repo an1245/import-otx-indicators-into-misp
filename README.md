@@ -6,13 +6,13 @@ Open Threat Exchange (OTX) is a crowd-sourced computer-security platform. It all
 MISP Threat Sharing (MISP), is an open source threat intelligence platform that develops utilities and documentation for more effective threat intelligence and sharing indicators of compromise.
 
 ## What is get-indicators-from-otx.py?
-I created the ***get-indicators-from-otx.py*** script to reduce the amount of false positive management I was having to do on my OTX threat feed data.  ***get-indicators-from-otx.py*** fetches domain/hostname (an optionally IPv4/IPv6) indicators from your subscribed OTX pulses and then uses a number of checks to determine if it is a false positive:
-1. It checks whether the indicator has been whitelisted in OTX, and if it is, does not add it into MISP
-2. It evaluates the most recent date/time (highest unix tz) from the following indicator metrics: 
+I created the ***get-indicators-from-otx.py*** script to reduce the amount of false positive management I was having to do on my OTX threat feed data.  ***get-indicators-from-otx.py*** fetches domain/hostname (an optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator for false positives by:
+1. Checking whether the indicator has been whitelisted in OTX, and if it is, does not add it into MISP
+2. Calculating the most recent date/time (highest unix tz) from the following indicator metrics: 
     - The most recent date/time it was observed in passive_dns
     - The most recent date/time it was observed in url_list
     - The creation date/time of the indicator in the pulse
-3. If the most recent date/time (from above) is newer than the decay model lifetime date/time, it either imports the indicator into MISP as a new attribute, or adds a sighting if the attribute exists in MISP already.
+3. Checking whether the date/time (from above) is newer than the decay model lifetime date/time. If it is, it imports the indicator into MISP as a new attribute, or adds a sighting if the attribute exists in MISP already.
 
 ## How do i get started?
 1. Download code from Git
