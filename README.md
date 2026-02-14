@@ -21,26 +21,29 @@ If the indicator is deemed not to be whitelisted or stale, the script will add t
 After all indicators have been processed the script will publish the event.
 
 ## How do i get started?
-1. Download code from Git
+1. Create a new Event in MISP and note it's Event ID (for use below)
+
+2. Download code from Git
 ```
 git clone https://github.com/an1245/import-otx-indicators-into-misp
 ```
 
-2. Change into directory 
+3. Change into directory 
 ```
 cd import-otx-indicators-into-misp
 ```
 
-3. Install the pre-requisites
+4. Install the pre-requisites
 ```
 pip install -r requirements.txt
 ```
 
-4. Edit the script
+5. Edit the script
 ```
 vi get-indicators-from-otx.py
 ```
-5. Configure your MISP url, MISP API Key, MISP Event ID and OTX API Key variables in the script
+
+6. Configure your MISP url, MISP API Key, MISP Event ID and OTX API Key variables in the script
 ```
 # ---- PyMISP Configuration ----
 MISP_URL = "{insert MISP url}"
@@ -50,15 +53,13 @@ EVENT_ID = {insert MISP Event ID}
 # ---- OTX Configuration ----
 OTX_API_KEY = "{insert OTX API key}" 
 ```
-5. Run the script
+7. Run the script
 ```
 python3 ./get-indicators-from-otx.py
 ```
 
 ## Considerations
 The script uses 1 API call per indicator to collect the indicator full details (get_indicator_details_full function).  Open Threat Exchange (OTX) limits API requests to 10k/hour when using and API key, returning a HTTP/429 response when you exceed this number. When the script receives an error, it will backoff for 2mins and retry again.
-
-You must have created an Event in MISP prior to running this script, and configured it's Event ID in the *EVENT_ID* variable.
 
 ## Issues / Feedback
 - I have done quite a lot of testing, but I am only human, so there may be bugs/errors.
