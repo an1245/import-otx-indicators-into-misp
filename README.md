@@ -1,9 +1,11 @@
 # Import Open Threat Exchange indicators into MISP
 
 ## Introduction
-Open Threat Exchange (OTX) is a crowd-sourced computer-security platform. It allows the global community of threat researchers and security professionals to collaborative on research, contribute community-generated threat data, and automate the process of updating security infrastructure with threat data.
+Open Threat Exchange (OTX) is a crowd-sourced computer-security platform. It allows the global community of threat researchers and security professionals to collaborative on research, contribute community-generated threat data, and automate the process of updating security infrastructure with threat data. The OTX Direct Connect API provides access to all Pulses that you have subscribed to in Open Threat Exchange.
 
-MISP Threat Sharing (MISP) is an open source threat intelligence platform that develops utilities and documentation for more effective threat intelligence and sharing indicators of compromise.  With MISP, you can consume threat intelligence from other organizaions, store, organise and enrich it with contextual information, search for indicators and correlate them together, and push that threat intelligence out to firewalls, IDSs and endpoints.
+MISP Threat Sharing (MISP) is an open source threat intelligence platform that develops utilities and documentation for more effective threat intelligence and sharing indicators of compromise.  With MISP, you can consume threat intelligence from other organizaions, store, organise and enrich it with contextual information, search for indicators and correlate them together, and push that threat intelligence out to firewalls, IDSs and endpoints. PyMISP is a Python library that provides an interface to access and automate a MISP (Malware Information Sharing Platform) instance via its REST API.
+
+MISP users can use the OTX Direct Connect API to export indicators from OTX and import them into MISP using the PyMISP API.
 
 ## What is get-indicators-from-otx.py?
 ***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives.
@@ -54,6 +56,8 @@ OTX_API_KEY = "{insert OTX API key}"
 
 ## Considerations
 Open Threat Exchange (OTX) limits API requests to 10k/hour when using and API key, returning a HTTP/429 response when you exceed this number. When the script receives an error, it will backoff for 2mins and retry again.
+
+You must have created an Event in MISP prior to running this script, and configured it's Event ID in the *EVENT_ID* variable.
 
 ## Issues / Feedback
 - I have done quite a lot of testing, but I am only human, so there may be bugs/errors.
