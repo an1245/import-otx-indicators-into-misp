@@ -24,7 +24,7 @@ If the indicator is deemed not to be whitelisted or stale, the script will add t
 git clone https://github.com/an1245/import-otx-indicators-into-misp
 ```
 
-2. Change into directory and set executable bit
+2. Change into directory 
 ```
 cd import-otx-indicators-into-misp
 ```
