@@ -3,7 +3,7 @@
 ## Introduction
 Open Threat Exchange (OTX) is a crowd-sourced computer-security platform. It allows the global community of threat researchers and security professionals to collaborative on research, contribute community-generated threat data, and automate the process of updating security infrastructure with threat data.
 
-MISP Threat Sharing (MISP), is an open source threat intelligence platform that develops utilities and documentation for more effective threat intelligence and sharing indicators of compromise.  With MISP, you can consume threat intelligence from other organizaions, store, organise and enrich it with contextual information, search for indicators and correlate them together, and push that threat intelligence out to firewalls, IDSs and endpoints.
+MISP Threat Sharing (MISP) is an open source threat intelligence platform that develops utilities and documentation for more effective threat intelligence and sharing indicators of compromise.  With MISP, you can consume threat intelligence from other organizaions, store, organise and enrich it with contextual information, search for indicators and correlate them together, and push that threat intelligence out to firewalls, IDSs and endpoints.
 
 ## What is get-indicators-from-otx.py?
 ***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives.
