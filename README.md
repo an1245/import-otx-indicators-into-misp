@@ -56,7 +56,7 @@ python3 ./get-indicators-from-otx.py
 ```
 
 ## Considerations
-Open Threat Exchange (OTX) limits API requests to 10k/hour when using and API key, returning a HTTP/429 response when you exceed this number. When the script receives an error, it will backoff for 2mins and retry again.
+The script uses 1 API call per indicator to collect the indicator full details (get_indicator_details_full function).  Open Threat Exchange (OTX) limits API requests to 10k/hour when using and API key, returning a HTTP/429 response when you exceed this number. When the script receives an error, it will backoff for 2mins and retry again.
 
 You must have created an Event in MISP prior to running this script, and configured it's Event ID in the *EVENT_ID* variable.
 
