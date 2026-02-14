@@ -15,7 +15,7 @@ MISP Threat Sharing (MISP) is an open source threat intelligence platform that d
     - The creation date/time of the indicator in the pulse
 3. Then checking if the most recent observation date/time (from above) is ***newer*** than the MISP decay model lifetime date/time - if it is, it imports the indicator into MISP as a new attribute, or adds a sighting if the attribute exists in MISP already.
 
-Evaluating the most recent observation date/time of an indicator helps to eliminate stale indicator entries which can lead to false positives.  This can occur where a new indicator is added to an old OTX pulse.
+Evaluating the most recent observation date/time of an indicator helps to eliminate stale indicator entries which can lead to false positives.  This can occur when a new indicator is added to an old OTX pulse.
 
 ## How do i get started?
 1. Download code from Git
