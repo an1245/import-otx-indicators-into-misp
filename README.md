@@ -8,7 +8,7 @@ MISP Threat Sharing (MISP) is an open source threat intelligence platform that d
 MISP users can use the OTX Direct Connect API to export indicators from OTX and import them into MISP using the PyMISP API.
 
 ## What is get-indicators-from-otx.py?
-***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives.
+***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives and stale entries.
 ***get-indicators-from-otx.py*** fetches domain/hostname (and optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator as a false positive by:
 1. Checking whether the indicator has been whitelisted in OTX - if it is whitelisted, it does not get added into MISP
 2. Evaluating whether the indicator is stale, by ensuring one of the following date/times are ***newer*** than the MISP decay model lifetime: 
