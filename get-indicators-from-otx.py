@@ -21,7 +21,7 @@ otx = OTXv2(OTX_API_KEY)
 
 # ---- Import Configuration ----
 DAYS=1              # number of days to import.  works best if you import 1 day and run every day
-DECAY_DAYS=365      # don't import events that are older than x days ( should align with lifetime days in your decay model )
+DECAY_DAYS=120      # don't import events that are older than x days ( should align with lifetime days in your decay model )
 
 # ---- Connect to MISP ----
 misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
