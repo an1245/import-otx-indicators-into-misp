@@ -16,7 +16,7 @@ MISP users can use the OTX Direct Connect API to export indicators from OTX and 
     - The most recent date/time observed in url_list
     - The creation date/time of the indicator in the pulse
 
-If the indicator is deemed not to be a false positive or stale, the script will add the indicator to the MISP Event specified by *EVENT_ID*.
+If the indicator is deemed not to be whitelisted or stale, the script will add the indicator to the MISP Event specified by *EVENT_ID*.
 
 ## How do i get started?
 1. Download code from Git
