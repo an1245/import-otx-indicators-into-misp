@@ -7,13 +7,15 @@ MISP Threat Sharing (MISP) is an open source threat intelligence platform that d
 
 ## What is get-indicators-from-otx.py?
 ***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives.
-***get-indicators-from-otx.py*** fetches domain/hostname (an optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator for false positives by:
-1. Checking whether the indicator has been whitelisted in OTX. If it has, it does not add it into MISP
-2. Calculating the most recent date/time (highest unix tz) from the following indicator metrics: 
+***get-indicators-from-otx.py*** fetches domain/hostname (an optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator as a false positive by:
+1. Checking whether the indicator has been whitelisted in OTX - if it has, it does not add it into MISP
+2. Finding the most recent observation date/time of the indicator by evaluating: 
     - The most recent date/time observed in passive_dns
     - The most recent date/time observed in url_list
     - The creation date/time of the indicator in the pulse
-3. Checking whether the date/time (from above) is ***newer*** than the MISP decay model lifetime date/time. If it is, it imports the indicator into MISP as a new attribute, or adds a sighting if the attribute exists in MISP already.
+3. Then checking that the most recent observation date/time (from above) is ***newer*** than the MISP decay model lifetime date/time - if it is, it imports the indicator into MISP as a new attribute, or adds a sighting if the attribute exists in MISP already.
+
+Evaluating the most recent observation date/time of an indicator helps to eliminate stale indicator entries which can lead to false positives.  This can occur where a new indicator is added to an old OTX pulse.
 
 ## How do i get started?
 1. Download code from Git
