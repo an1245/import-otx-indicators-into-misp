@@ -27,7 +27,6 @@ git clone https://github.com/an1245/import-otx-indicators-into-misp
 2. Change into directory and set executable bit
 ```
 cd import-otx-indicators-into-misp
-chmod 0700 get-indicators-from-otx.py
 ```
 
 3. Install the pre-requisites
@@ -51,7 +50,7 @@ OTX_API_KEY = "{insert OTX API key}"
 ```
 5. Run the script
 ```
-./get-indicators-from-otx.py
+python3 ./get-indicators-from-otx.py
 ```
 
 ## Considerations
