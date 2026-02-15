@@ -2,12 +2,11 @@
 from datetime import datetime, timedelta, timezone
 import time
 
-# ---- PyMISP Configuration ----
+# ---- Import PyMISP ----
 from pymisp import PyMISP
-MISP_URL = "{insert MISP url}"
-MISP_API_KEY = "{insert MISP API key}"
-MISP_VERIFY_CERT = False
-EVENT_ID = {insert MISP Event ID}
+
+# ---- Import Config ----
+from config import *
 
 # ---- Disable Certificate Warnings ----
 import urllib3
@@ -16,7 +15,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ---- OTX Configuration ----
 from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
-OTX_API_KEY = "{insert OTX API key}" 
 otx = OTXv2(OTX_API_KEY)
 
 # ---- Import Configuration ----
