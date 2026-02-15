@@ -17,10 +17,6 @@ from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
 otx = OTXv2(OTX_API_KEY)
 
-# ---- Import Configuration ----
-DAYS=1              # number of days to import.  works best if you import 1 day and run every day
-DECAY_DAYS=120      # don't import events that are older than x days ( should align with lifetime days in your decay model )
-
 # ---- Connect to MISP ----
 misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
 
@@ -28,7 +24,7 @@ misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
 event = misp.get_event(EVENT_ID, pythonify=True)
 
 # ---- Convert import DAYS into a timestamp
-import_days_tz  = datetime.now(timezone.utc) - timedelta(days=DAYS)
+import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
 
 # ---- Get new Domain/Hostname indicators from OTX ----
 try:
