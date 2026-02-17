@@ -23,11 +23,7 @@ otx = OTXv2(OTX_API_KEY)
 # ---- Connect to MISP ----
 try:
 	misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
-	# Test connection to catch auth/URL errors
-	if not misp.test_connection():
-		print("Failed to connect to MISP Server: Invalid URL or API key.")
-		sys.exit(1)
-		
+	
 except requests.exceptions.ConnectionError as e:
 	print(f"Failed to connect to MISP Server: (check URL): {e}")
 	sys.exit(1)
@@ -44,7 +40,7 @@ try:
 	event = misp.get_event(EVENT_ID, pythonify=True)
 except Exception as e:
 	print(f"Failed to get Event ID from MISP: Error: {e}")
-    sys.exit(1)
+	sys.exit(1)
 
 # ---- Convert import DAYS into a timestamp
 import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
