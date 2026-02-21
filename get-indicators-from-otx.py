@@ -1,9 +1,12 @@
 # ---- Datetime for time conversions ----
 from datetime import datetime, timedelta, timezone
 import time
+import requests.exceptions
+import sys
 
 # ---- Import PyMISP ----
 from pymisp import PyMISP
+from pymisp.exceptions import PyMISPError
 
 # ---- Import Config ----
 from config import *
@@ -18,10 +21,26 @@ from OTXv2 import IndicatorTypes
 otx = OTXv2(OTX_API_KEY)
 
 # ---- Connect to MISP ----
-misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
+try:
+	misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
+	
+except requests.exceptions.ConnectionError as e:
+	print(f"Failed to connect to MISP Server: (check URL): {e}")
+	sys.exit(1)
+except PyMISPError as e:
+	print(f"Failed to connect to MISP Server: Authentication failed: {e}")
+	sys.exit(1)
+except Exception as e:
+	print(f"Failed to connect to MISP Server: An unexpected error occurred: {e}")
+	sys.exit(1)
+	
 
 # ---- Get event with attributes ----
-event = misp.get_event(EVENT_ID, pythonify=True)
+try:
+	event = misp.get_event(EVENT_ID, pythonify=True)
+except Exception as e:
+	print(f"Failed to get Event ID from MISP: Error: {e}")
+	sys.exit(1)
 
 # ---- Convert import DAYS into a timestamp
 import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
@@ -156,7 +175,10 @@ for indicator in indicators:
 		    # ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
 				if otx_created_timestamp > otx_latest_sighting:
 					print("Indicator exists - OTX timestamp was newer- adding sighting")
-					response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
+					try:
+						response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
+					except Exception as e:
+   						print(f"Failed to create sighting - continuing")
 				else:
 					print("Indicator exists - OTX timestamp was older or the same - skipping")
 
@@ -166,10 +188,16 @@ for indicator in indicators:
 			# ---- Only add indicator if it's greater than decay_unix_timestamp ----
 			if otx_latest_sighting >=  decay_unixtimestamp:
 				print("Indicator didn't exist - Adding attribute ")
-				misp.add_attribute(EVENT_ID,{"type": misp_type,"value": indicator_value,"to_ids": True, "timestamp": otx_latest_sighting})
+				try:
+					misp.add_attribute(EVENT_ID,{"type": misp_type,"value": indicator_value,"to_ids": True, "timestamp": otx_latest_sighting})
+				except Exception as e:
+   						print(f"Failed to create attribute - continuing")
 			else:
 				print("Indicator ts > decay_days ts - skipping ")
 
 # ---- Publish the event ----
 print("Publishing Event")
-misp.publish(EVENT_ID, alert=False)
+try:
+	misp.publish(EVENT_ID, alert=False)
+except Exception as e:
+	print(f"Failed to publish MISP event!")
