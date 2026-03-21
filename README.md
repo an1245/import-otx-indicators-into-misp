@@ -10,8 +10,9 @@ MISP users can use the OTX Direct Connect API to export indicators from OTX and 
 ## What is get-indicators-from-otx.py?
 ***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives and stale entries.
 ***get-indicators-from-otx.py*** fetches domain/hostname (and optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator as a false positive by:
-1. Checking whether the indicator has been whitelisted in OTX - if it is whitelisted, it does not get added into MISP
-2. Evaluating whether the indicator is stale, by ensuring one of the following date/times are ***newer*** than the MISP decay model lifetime: 
+1. Checking whether the indicator has been whitelisted in OTX
+2. If indicator is whitelisted in OTX, it uses the VirusTotal API to get the Malicious score from VirusTotal.  If the Malicious score is greater than ***VT_MALICIOUS_THRESHOLD** it moves onto the stale entry checking below.
+3. Evaluating whether the indicator is stale, by ensuring one of the following date/times are ***newer*** than the MISP decay model lifetime: 
     - The most recent date/time observed in passive_dns
     - The most recent date/time observed in url_list
     - The creation date/time of the indicator in the pulse
@@ -43,7 +44,7 @@ pip install -r requirements.txt
 vi config.py
 ```
 
-6. Configure your MISP url, MISP API Key, MISP Event ID and OTX API Key, Import and Decay Days variables in the script
+6. Configure your MISP url, MISP API Key, MISP Event ID OTX API Key and VirusTotal API Key in ***config.py***.   Define your import and Decay Days variables.
 ```
 # ---- PyMISP Configuration ----
 MISP_URL = "{insert MISP url}"
@@ -57,6 +58,12 @@ OTX_API_KEY = "{insert OTX API key}"
 # ---- Import Configuration ----
 IMPORT_DAYS=1              # number of days to import.  works best if you import 1 day and run every day
 DECAY_DAYS=120      # don't import events that are older than x days ( should align with lifetime days in your decay model )
+
+# ---- VirusTotal API Key ----
+VT_API_KEY = "{insert VirusTotal API key}"
+
+# ---- VirusTotal Malicious Score Limit ----
+VT_MALICIOUS_THRESHOLD = 4        # if the malicious score is greater than this number, include it.
 ```
 7. Run the script
 ```
