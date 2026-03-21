@@ -10,8 +10,8 @@ MISP users can use the OTX Direct Connect API to export indicators from OTX and 
 ## What is get-indicators-from-otx.py?
 ***get-indicators-from-otx.py*** allows you to ingest OTX threat intelligence into your MISP server in a way that reduces false positives and stale entries.
 ***get-indicators-from-otx.py*** fetches domain/hostname (and optionally IPv4/IPv6) indicators from your subscribed OTX pulses and evaluates each indicator as a false positive by:
-1. Checking whether the indicator has been whitelisted in OTX
-2. If indicator is whitelisted in OTX, it uses the VirusTotal API to get the Malicious score from VirusTotal.  If the Malicious score is greater than ***VT_MALICIOUS_THRESHOLD*** it moves onto the stale entry checking below.
+1. Checking whether the domain has been whitelisted in OTX
+2. If domain is whitelisted in OTX, it uses the VirusTotal API to get the Malicious score for this domain/hostname/IP from VirusTotal.  If the Malicious score is greater than ***VT_MALICIOUS_THRESHOLD*** it moves onto the stale entry checking below.
 3. Evaluating whether the indicator is stale, by ensuring one of the following date/times are ***newer*** than the MISP decay model lifetime: 
     - The most recent date/time observed in passive_dns
     - The most recent date/time observed in url_list
