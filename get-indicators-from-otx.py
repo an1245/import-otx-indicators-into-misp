@@ -11,6 +11,9 @@ from pymisp.exceptions import PyMISPError
 # ---- Import Config ----
 from config import *
 
+# ---- Import VirusTotal
+from virustotal import *
+
 # ---- Disable Certificate Warnings ----
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -127,8 +130,25 @@ for indicator in indicators:
                         for v in validation
                 )
 	if is_whitelisted:
-		print("Indicator was in whitelist - skipping")
-		continue
+
+		print("In OTX whitelist - ", end="")
+
+		# ---- Get reputation score from VirusTotal ----
+		if misp_type == "domain" or misp_type == "hostname":
+			vt_malicious_score = get_virustotal_domain_score(indicator_value)
+		elif misp_type == "ip-dst":
+			vt_malicious_score = get_virustotal_ip_score(indicator_value)
+		else:
+			vt_malicious_score = 0
+
+		print("VT Malicious Score: ", vt_malicious_score , " and Threshold: ", VT_MALICIOUS_THRESHOLD, " - ", end="")
+
+		# ---- Check if malicious score is greater than threshold and if it is, add it.
+		if vt_malicious_score < VT_MALICIOUS_THRESHOLD:
+			print("VT malicious score < threshold - skipping")
+			continue
+		else:
+			print("VT malicious score >= threshold - adding - " , end="")
 
 	# ---- Get the last_seen time from passive_dns  ----
 	indicator_passive_dns = indicator_details.get("passive_dns")
@@ -172,7 +192,7 @@ for indicator in indicators:
 
 				misp_attribute_timestamp  = int(attribute.timestamp.timestamp())
 
-		    # ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
+				# ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
 				if otx_created_timestamp > otx_latest_sighting:
 					print("Indicator exists - OTX timestamp was newer- adding sighting")
 					try:
