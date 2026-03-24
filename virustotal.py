@@ -17,7 +17,7 @@ def get_virustotal_domain_score(domain):
 
 	# ---- Execute request and parse response ----
 	try:
-		response = requests.get(url, headers=headers)
+		response = requests.get(url, headers=headers, timeout=10)
 
 		json_obj = response.json()
 
@@ -39,7 +39,7 @@ def get_virustotal_ip_score(ip):
 
 	# ---- Execute request and parse response ----
 	try:
-		response = requests.get(url, headers=headers)
+		response = requests.get(url, headers=headers, timeout=10)
 
 		json_obj = response.json()
 
