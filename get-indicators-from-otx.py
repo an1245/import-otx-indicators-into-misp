@@ -51,19 +51,25 @@ import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
 # ---- Get new Domain/Hostname indicators from OTX ----
 try:
 	indicators = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
+	indicator_count = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
 except Exception as e:
 	print("Caught error when trying to get indicators from OTX: ", e)
 	traceback.print_exc()
 
+icount = sum(1 for _ in indicator_count)
+print(f"Processing {icount} indicators")
+
 # ---- Enumerate the indicators and see if they exist already
+count = 0
 for indicator in indicators:
+	count = count + 1
 	print(".", end="")
 	indicator_type = indicator.get("type")
 	indicator_created = ""
 	misp_type = ""
 	otx_type = ""
 	indicator_value = indicator.get("indicator","")
-	print("Processing indicator ", indicator_value, ": ", end="")
+	print(f"Processing {count}/{icount}: {indicator_value} : ", end="")
 	indicator_details = ""
 
 	# ---- Get the indicator_details_full section for each indicator ----
