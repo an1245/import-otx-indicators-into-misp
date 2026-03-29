@@ -1,4 +1,4 @@
 urllib3==2.6.3
-pymisp==2.5.32.3
-requests==2.32.5
+pymisp==2.5.33.1
+requests==2.33.0
 otxv2==1.5.12

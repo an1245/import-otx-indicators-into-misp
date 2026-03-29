@@ -11,6 +11,9 @@ from pymisp.exceptions import PyMISPError
 # ---- Import Config ----
 from config import *
 
+# ---- Import VirusTotal
+from virustotal import *
+
 # ---- Disable Certificate Warnings ----
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -48,19 +51,25 @@ import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
 # ---- Get new Domain/Hostname indicators from OTX ----
 try:
 	indicators = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
+	indicator_count = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
 except Exception as e:
 	print("Caught error when trying to get indicators from OTX: ", e)
 	traceback.print_exc()
 
+icount = sum(1 for _ in indicator_count)
+print(f"Processing {icount} indicators")
+
 # ---- Enumerate the indicators and see if they exist already
+count = 0
 for indicator in indicators:
+	count = count + 1
 	print(".", end="")
 	indicator_type = indicator.get("type")
 	indicator_created = ""
 	misp_type = ""
 	otx_type = ""
 	indicator_value = indicator.get("indicator","")
-	print("Processing indicator ", indicator_value, ": ", end="")
+	print(f"Processing {count}/{icount}: {indicator_value} : ", end="")
 	indicator_details = ""
 
 	# ---- Get the indicator_details_full section for each indicator ----
@@ -127,8 +136,25 @@ for indicator in indicators:
                         for v in validation
                 )
 	if is_whitelisted:
-		print("Indicator was in whitelist - skipping")
-		continue
+
+		print("In OTX whitelist - ", end="")
+
+		# ---- Get reputation score from VirusTotal ----
+		if misp_type == "domain" or misp_type == "hostname":
+			vt_malicious_score = get_virustotal_domain_score(indicator_value)
+		elif misp_type == "ip-dst":
+			vt_malicious_score = get_virustotal_ip_score(indicator_value)
+		else:
+			vt_malicious_score = 0
+
+		print("VT Malicious Score: ", vt_malicious_score , " and Threshold: ", VT_MALICIOUS_THRESHOLD, " - ", end="")
+
+		# ---- Check if malicious score is greater than threshold and if it is, add it.
+		if vt_malicious_score < VT_MALICIOUS_THRESHOLD:
+			print("VT malicious score < threshold - skipping")
+			continue
+		else:
+			print("VT malicious score >= threshold - adding - " , end="")
 
 	# ---- Get the last_seen time from passive_dns  ----
 	indicator_passive_dns = indicator_details.get("passive_dns")
@@ -172,7 +198,7 @@ for indicator in indicators:
 
 				misp_attribute_timestamp  = int(attribute.timestamp.timestamp())
 
-		    # ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
+				# ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
 				if otx_created_timestamp > otx_latest_sighting:
 					print("Indicator exists - OTX timestamp was newer- adding sighting")
 					try:
