@@ -93,8 +93,11 @@ for indicator in indicators:
 					print("Retrying(", fail_count,"):", end="")
 					continue
 			else:
-				print("Failed to collect indicator details - continue to next indicator")
-				continue     # the loop failed too many times so we continue the outer loop
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
 
 		case "IPv6":
 			misp_type = "ip-dst"
@@ -112,8 +115,11 @@ for indicator in indicators:
 					print("Retrying(", fail_count,"):", end="")
 					continue
 			else:
-				print("Failed to collect indicator details - continue to next indicator")
-				continue     # the loop failed too many times so we continue the outer loop
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
 
 		case "domain":
 			misp_type = "domain"
@@ -131,8 +137,11 @@ for indicator in indicators:
 					print("Retrying(", fail_count,"):", end="")
 					continue
 			else:
-				print("Failed to collect indicator details - continue to next indicator")
-				continue     # the loop failed too many times so we continue the outer loop
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
 
 		case "hostname":
 			misp_type = "hostname"
@@ -150,7 +159,7 @@ for indicator in indicators:
 					print("Retrying(", fail_count,"):", end="")
 					continue
 			else:
-				print("Failed to collect indicator details - Creating JSON Object for entry")
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
 				# Create a JSON object for it.
 				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
