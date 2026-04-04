@@ -24,7 +24,7 @@ from OTXv2 import IndicatorTypes
 otx = OTXv2(OTX_API_KEY)
 
 # ---- Set continue on fail threshold ----
-fail_continue_count = 10
+fail_continue_count = 5
 
 # ---- Connect to MISP ----
 try:
@@ -150,8 +150,11 @@ for indicator in indicators:
 					print("Retrying(", fail_count,"):", end="")
 					continue
 			else:
-				print("Failed to collect indicator details - continue to next indicator")
-				continue     # the loop failed too many times so we continue the outer loop
+				print("Failed to collect indicator details - Creating JSON Object for entry")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
 
 		case _:
 		        continue
