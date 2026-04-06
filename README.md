@@ -71,7 +71,7 @@ python3 ./get-indicators-from-otx.py
 ```
 
 ## Considerations
-The script uses 1 API call per indicator to collect the indicator full details (get_indicator_details_full function).  Open Threat Exchange (OTX) limits API requests to 10k/hour when using and API key, returning a HTTP/429 response when you exceed this number. When the script receives an error, it will backoff for 2mins and retry again.
+The script uses 1 API call per indicator to collect the indicator full details (get_indicator_details_full function).  Open Threat Exchange (OTX) limits API requests to 10k/hour when using and API key, returning a HTTP/429 response when you exceed this number. When the script receives an error, it will backoff for 2mins and retry again. If it fails to receive the indicator full details (get_indicator_details_full function) after five attempts, it will add the indicator and move on to the next one.
 
 ## Issues / Feedback
 - I have done quite a lot of testing, but I am only human, so there may be bugs/errors.
