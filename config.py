@@ -16,3 +16,6 @@ VT_API_KEY = "{insert VirusTotal API key}"
 
 # ---- VirusTotal Malicious Score Limit ----
 VT_MALICIOUS_THRESHOLD = 2          # if the malicious score is greater than this number, include it.
+
+# ---- Add OTX tags into MISP? -----
+ADD_OTX_TAGS_TO_MISP = True

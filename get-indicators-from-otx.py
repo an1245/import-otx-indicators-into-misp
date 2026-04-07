@@ -5,7 +5,7 @@ import requests.exceptions
 import sys
 
 # ---- Import PyMISP ----
-from pymisp import PyMISP
+from pymisp import PyMISP, MISPAttribute
 from pymisp.exceptions import PyMISPError
 
 # ---- Import Config ----
@@ -253,10 +253,23 @@ for indicator in indicators:
 			# ---- Only add indicator if it's greater than decay_unix_timestamp ----
 			if otx_latest_sighting >=  decay_unixtimestamp:
 				print("Indicator didn't exist - Adding attribute ")
+				
 				try:
-					misp.add_attribute(EVENT_ID,{"type": misp_type,"value": indicator_value,"to_ids": True, "timestamp": otx_latest_sighting})
+					misp_attribute = MISPAttribute()
+					misp_attribute.type = misp_type
+					misp_attribute.value = indicator_value
+					misp_attribute.to_ids = True
+					misp_attribute.timestamp = otx_latest_sighting
+					if ADD_OTX_TAGS_TO_MISP:
+						pulses = indicator_details.get("general")["pulse_info"]["pulses"]
+						for pulse in pulses:
+							for tag in pulse["tags"]:
+								misp_attribute.add_tag(tag)
+
+					misp.add_attribute(EVENT_ID, misp_attribute)
 				except Exception as e:
    						print(f"Failed to create attribute - continuing")
+						   
 			else:
 				print("Indicator ts > decay_days ts - skipping ")
 
