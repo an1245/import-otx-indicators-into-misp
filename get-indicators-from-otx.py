@@ -23,6 +23,9 @@ from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
 otx = OTXv2(OTX_API_KEY)
 
+# ---- Set continue on fail threshold ----
+fail_continue_count = 5
+
 # ---- Connect to MISP ----
 try:
 	misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
@@ -76,56 +79,92 @@ for indicator in indicators:
 	match indicator_type:
 		case "IPv4":
 			misp_type = "ip-dst"
-			while True:
+			fail_count = 0
+			while fail_count < fail_continue_count:
 				try:
 					print("fetching details (IPv4): ", end="")
 					indicator_details = otx.get_indicator_details_full(IndicatorTypes.IPv4, indicator_value)
 					break
 				except Exception as e:
+					fail_count = fail_count + 1
 					print("Caught error: ", e, end="")
 					print("Sleeping 2 mins: ", end="")
 					time.sleep(120)
-					print("Retrying: ", end="")
+					print("Retrying(", fail_count,"):", end="")
 					continue
+			else:
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
+
 		case "IPv6":
 			misp_type = "ip-dst"
-			while True:
+			fail_count = 0
+			while fail_count < fail_continue_count:				
 				try:
 					print("fetching details (IPv6): ", end="")
 					indicator_details = otx.get_indicator_details_full(IndicatorTypes.IPv6, indicator_value)
 					break
 				except Exception as e:
+					fail_count = fail_count + 1
 					print("Caught error: ", e, end="")
 					print("Sleeping 2 mins:", end="")
 					time.sleep(120)
-					print("Retrying: ", end="")
+					print("Retrying(", fail_count,"):", end="")
 					continue
+			else:
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
+
 		case "domain":
 			misp_type = "domain"
-			while True:
+			fail_count = 0
+			while fail_count < fail_continue_count:
 				try:
 					print("fetching details (domain): ", end="")
 					indicator_details = otx.get_indicator_details_full(IndicatorTypes.DOMAIN, indicator_value)
 					break
 				except Exception as e:
+					fail_count = fail_count + 1
 					print("Caught error: ", e, end="")
 					print("Sleeping 2 mins:", end="")
 					time.sleep(120)
-					print("Retrying: ", end="")
+					print("Retrying(", fail_count,"):", end="")
 					continue
+			else:
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
+
 		case "hostname":
 			misp_type = "hostname"
-			while True:
+			fail_count = 0
+			while fail_count < fail_continue_count:
 				try:
 					print("fetching details (hostname): ", end="")
 					indicator_details = otx.get_indicator_details_full(IndicatorTypes.HOSTNAME, indicator_value)
 					break
 				except Exception as e:
+					fail_count = fail_count + 1
 					print("Caught error: ", e, end="")
 					print("Sleeping 2 mins:", end="")
 					time.sleep(120)
-					print("Retrying: ", end="")
+					print("Retrying(", fail_count,"):", end="")
 					continue
+			else:
+				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
+				# Create a JSON object for it.
+				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
+				indicator_details = json.loads(json_string)
+
 		case _:
 		        continue
 
