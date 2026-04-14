@@ -17,7 +17,7 @@ MISP users can use the OTX Direct Connect API to export indicators from OTX and 
     - The most recent date/time observed in url_list
     - The creation date/time of the indicator in the pulse
 
-If the indicator is deemed not to be whitelisted or stale, the script will add the indicator to the MISP Event specified by ***EVENT_ID***, with the ***to_ids*** flag set to true, and the indicator date set to the most recent of the three date/times evaluated above.  
+If the indicator is deemed not to be whitelisted or stale, the script will add the indicator to the MISP Event specified by ***EVENT_ID***, with the ***to_ids*** flag set to true, and the indicator date set to the most recent of the three date/times evaluated above.  If you want to create a new MISP event each time, you can set ***AUTO_GENERATE_NEW_EVENT*** to True in ***config.py***.  This will create a new event and add all the indicators to that event.
 
 After all indicators have been processed the script will publish the event.
 
@@ -50,13 +50,14 @@ vi config.py
 MISP_URL = "{insert MISP url}"
 MISP_API_KEY = "{insert MISP API key}"
 MISP_VERIFY_CERT = False
-EVENT_ID = {insert MISP Event ID}
+EVENT_ID = {insert MISP Event ID}          # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
+AUTO_GENERATE_NEW_EVENT = False            # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be configured and indicators added to that
 
 # ---- OTX Configuration ----
 OTX_API_KEY = "{insert OTX API key}" 
 
 # ---- Import Configuration ----
-IMPORT_DAYS=1                   # number of days to import.  works best if you import 1 day and run every day (ideally 12 hours)
+IMPORT_DAYS=1                   # number of days to import.  works best if you import 1 day and run every day 
 DECAY_DAYS=120                  # don't import events that are older than x days ( should align with lifetime days in your decay model )
 
 # ---- VirusTotal API Key ----

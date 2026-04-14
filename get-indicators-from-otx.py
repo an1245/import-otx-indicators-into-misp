@@ -5,7 +5,7 @@ import requests.exceptions
 import sys
 
 # ---- Import PyMISP ----
-from pymisp import PyMISP
+from pymisp import PyMISP, MISPEvent
 from pymisp.exceptions import PyMISPError
 
 # ---- Import Config ----
@@ -40,6 +40,29 @@ except Exception as e:
 	print(f"Failed to connect to MISP Server: An unexpected error occurred: {e}")
 	sys.exit(1)
 	
+
+# ---- Generate new event if AUTO_GENERATE_NEW_EVENT is True ----
+try:
+	if AUTO_GENERATE_NEW_EVENT:
+		try:
+			event = MISPEvent()
+			event.info = "Imported indicators from LevelBlue Open Threat Exchange "
+			event.distribution = 0  		# Your organization only
+			event.threat_level_id = 2  		# Medium
+			event.analysis = 0  			# Initial
+			new_event = misp.add_event(event, pythonify=True)
+			EVENT_ID = new_event.id
+			
+		except Exception as e:
+			print(f"Failed creating new Event in MISP: Error: {e}")
+			sys.exit(1)
+	else:
+		if not isinstance(EVENT_ID, (int)):
+			print(f"EVENT ID is not a number and AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
+			sys.exit(1)
+except NameError:
+	print("AUTO_GENERATE_NEW_EVENT variable is not set in the configuration - check documentation.")
+
 
 # ---- Get event with attributes ----
 try:
