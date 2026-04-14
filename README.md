@@ -51,7 +51,7 @@ MISP_URL = "{insert MISP url}"
 MISP_API_KEY = "{insert MISP API key}"
 MISP_VERIFY_CERT = False
 EVENT_ID = {insert MISP Event ID}          # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
-AUTO_GENERATE_NEW_EVENT = False            # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be configured and indicators added to that
+AUTO_GENERATE_NEW_EVENT = False            # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be created and indicators added to that
 
 # ---- OTX Configuration ----
 OTX_API_KEY = "{insert OTX API key}" 
