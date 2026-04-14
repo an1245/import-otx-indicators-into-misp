@@ -22,7 +22,7 @@ If the indicator is deemed not to be whitelisted or stale, the script will add t
 After all indicators have been processed the script will publish the event.
 
 ## How do i get started?
-1. Create a new Event in MISP and note it's Event ID (for use below)
+1. If not using AUTO_GENERATE_NEW_EVENT, create a new Event in MISP and note it's Event ID (for use below)
 
 2. Download code from Git
 ```
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 vi config.py
 ```
 
-6. Configure your MISP url, MISP API Key, MISP Event ID OTX API Key and VirusTotal API Key in ***config.py***.   Define your import and Decay Days variables.
+6. Configure your MISP url, MISP API Key, MISP Event ID, OTX API Key and VirusTotal API Key in ***config.py***.   Define your import and Decay Days variables.
 ```
 # ---- PyMISP Configuration ----
 MISP_URL = "{insert MISP url}"
