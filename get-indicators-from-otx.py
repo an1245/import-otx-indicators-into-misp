@@ -83,7 +83,7 @@ except Exception as e:
 	traceback.print_exc()
 
 icount = sum(1 for _ in indicator_count)
-print(f"Processing {icount} indicators")
+print(f"Processing {icount} OTX indicators into MISP Event ID: {EVENT_ID}")
 
 # ---- Enumerate the indicators and see if they exist already
 count = 0
