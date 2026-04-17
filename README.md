@@ -27,7 +27,7 @@ All indicators will be added with the ***to_ids*** flag set to true, and the ind
 After all indicators have been processed the script will publish the event.
 
 ## How do i get started?
-1. If not using AUTO_GENERATE_NEW_EVENT, create a new Event in MISP and note it's Event ID (for use below)
+1. Create a new Event in MISP and note it's Event ID (if not using AUTO_GENERATE_NEW_EVENT)
 
 2. Download code from Git
 ```
