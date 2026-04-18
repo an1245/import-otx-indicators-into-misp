@@ -18,9 +18,9 @@ MISP users can use the OTX Direct Connect API to export indicators from OTX and 
     - The creation date/time of the indicator in the pulse
 
 If the indicator is deemed not to be whitelisted or stale, the script will either:
-1. add the indicator to the MISP Event specified by ***EVENT_ID*** in ***config.py***  (deduplicated)
+1. add the indicator to the MISP Event specified by ***EVENT_ID*** in ***config.py***  (deduplicated, but event is not published whilst updating)
 or
-2. add the indicator to a newly created MISP event if you have ***AUTO_GENERATE_NEW_EVENT*** set to True in ***config.py*** (duplicates can occur across events)
+2. add the indicator to a newly created MISP event if you have ***AUTO_GENERATE_NEW_EVENT*** set to True in ***config.py*** (duplicates occur across events, but previous runs remain published whilst updating)
 
 All indicators will be added with the ***to_ids*** flag set to true, and the indicator date set to the most recent of the three date/times evaluated above.  
 
