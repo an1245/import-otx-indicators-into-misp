@@ -1,3 +1,8 @@
+## v0.4
+
+### Additions
+* Added the ability to automatically generate a new MISP event when AUTO_GENERATE_NEW_EVENT is set to True
+
 ## v0.3
 
 ### Additions

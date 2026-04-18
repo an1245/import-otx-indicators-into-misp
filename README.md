@@ -17,12 +17,17 @@ MISP users can use the OTX Direct Connect API to export indicators from OTX and 
     - The most recent date/time observed in url_list
     - The creation date/time of the indicator in the pulse
 
-If the indicator is deemed not to be whitelisted or stale, the script will add the indicator to the MISP Event specified by ***EVENT_ID***, with the ***to_ids*** flag set to true, and the indicator date set to the most recent of the three date/times evaluated above.  
+If the indicator is deemed not to be whitelisted or stale, the script will either:
+1. add the indicator to the MISP Event specified by ***EVENT_ID*** in ***config.py***  (deduplicated, but event is not published whilst updating)
+or
+2. add the indicator to a newly created MISP event if you have ***AUTO_GENERATE_NEW_EVENT*** set to True in ***config.py*** (duplicates occur across events, but previous runs remain published whilst updating)
+
+All indicators will be added with the ***to_ids*** flag set to true, and the indicator date set to the most recent of the three date/times evaluated above.  
 
 After all indicators have been processed the script will publish the event.
 
 ## How do i get started?
-1. Create a new Event in MISP and note it's Event ID (for use below)
+1. Create a new Event in MISP and note it's Event ID (if not using AUTO_GENERATE_NEW_EVENT)
 
 2. Download code from Git
 ```
@@ -44,19 +49,20 @@ pip install -r requirements.txt
 vi config.py
 ```
 
-6. Configure your MISP url, MISP API Key, MISP Event ID OTX API Key and VirusTotal API Key in ***config.py***.   Define your import and Decay Days variables.
+6. Configure your MISP url, MISP API Key, MISP Event ID, OTX API Key and VirusTotal API Key in ***config.py***.   Define your import and Decay Days variables.
 ```
 # ---- PyMISP Configuration ----
 MISP_URL = "{insert MISP url}"
 MISP_API_KEY = "{insert MISP API key}"
 MISP_VERIFY_CERT = False
-EVENT_ID = {insert MISP Event ID}
+EVENT_ID = {insert MISP Event ID}          # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
+AUTO_GENERATE_NEW_EVENT = False            # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be created and indicators added to that
 
 # ---- OTX Configuration ----
 OTX_API_KEY = "{insert OTX API key}" 
 
 # ---- Import Configuration ----
-IMPORT_DAYS=1                   # number of days to import.  works best if you import 1 day and run every day (ideally 12 hours)
+IMPORT_DAYS=1                   # number of days to import.  works best if you import 1 day and run every day 
 DECAY_DAYS=120                  # don't import events that are older than x days ( should align with lifetime days in your decay model )
 
 # ---- VirusTotal API Key ----
