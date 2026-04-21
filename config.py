@@ -4,6 +4,7 @@ MISP_API_KEY = "{insert MISP API key}"
 MISP_VERIFY_CERT = False
 EVENT_ID = {insert MISP Event ID}          # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
 AUTO_GENERATE_NEW_EVENT = False            # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be configured and indicators added to that event
+ENRICH_EVENT_WITH_PULSE_NAMES = True       # if ENRICH_EVENT_WITH_PULSE_NAMES is set to True, the pulse names that an indicator exists in will be written into the attribute comment
 
 # ---- OTX Configuration ----
 OTX_API_KEY = "{insert OTX API key}" 

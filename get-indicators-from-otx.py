@@ -5,7 +5,7 @@ import requests.exceptions
 import sys
 
 # ---- Import PyMISP ----
-from pymisp import PyMISP, MISPEvent
+from pymisp import PyMISP, MISPEvent, MISPAttribute
 from pymisp.exceptions import PyMISPError
 
 # ---- Import Config ----
@@ -262,9 +262,21 @@ for indicator in indicators:
 
 				# ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
 				if otx_created_timestamp > otx_latest_sighting:
+					
+					source = ""
+					try:
+						if ENRICH_EVENT_WITH_PULSE_NAMES:
+							# Put pulse names into references
+							pulses = indicator_details.get("general")["pulse_info"]["pulses"]
+							for pulse in pulses:
+								source = f"{source} OTX Pulse Name: {pulse.get("name")}\n"
+					
+					except NameError:
+						pass
+
 					print("Indicator exists - OTX timestamp was newer- adding sighting")
 					try:
-						response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
+						response = misp.add_sighting({'id': attribute.id,'source': source,'type': '0'})
 					except Exception as e:
    						print(f"Failed to create sighting - continuing")
 				else:
@@ -277,9 +289,32 @@ for indicator in indicators:
 			if otx_latest_sighting >=  decay_unixtimestamp:
 				print("Indicator didn't exist - Adding attribute ")
 				try:
-					misp.add_attribute(EVENT_ID,{"type": misp_type,"value": indicator_value,"to_ids": True, "timestamp": otx_latest_sighting})
+					misp_attribute = MISPAttribute()
+					misp_attribute.type = misp_type
+					misp_attribute.value = indicator_value
+					misp_attribute.to_ids = True
+					misp_attribute.timestamp = otx_latest_sighting
+					
+					comment = ""
+					try: 
+						if ENRICH_EVENT_WITH_PULSE_NAMES:
+							# Put pulse names into references
+							pulses = indicator_details.get("general")["pulse_info"]["pulses"]
+							for pulse in pulses:
+								comment = f"{comment} OTX Pulse Name: {pulse.get("name")}\n"
+					except NameError:
+						pass
+
+
+					misp_attribute.comment = comment
+					
+					misp.add_attribute(EVENT_ID, misp_attribute)
+					
+					# Add to event.attributes list so that if we find a duplicate entry in this run, we make a sighting
+					event.attributes.append(misp_attribute)
+
 				except Exception as e:
-   						print(f"Failed to create attribute - continuing")
+   						print(f"Failed to create attribute - continuing", e)
 			else:
 				print("Indicator ts > decay_days ts - skipping ")
 
