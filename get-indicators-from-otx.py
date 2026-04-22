@@ -5,7 +5,7 @@ import requests.exceptions
 import sys
 
 # ---- Import PyMISP ----
-from pymisp import PyMISP, MISPEvent, MISPAttribute
+from pymisp import PyMISP, MISPEvent, MISPAttribute, MISPTag
 from pymisp.exceptions import PyMISPError
 
 # ---- Import Config ----
@@ -261,24 +261,40 @@ for indicator in indicators:
 				misp_attribute_timestamp  = int(attribute.timestamp.timestamp())
 
 				# ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
-				if otx_created_timestamp > otx_latest_sighting:
-					
-					source = ""
+				if otx_created_timestamp > otx_latest_sighting:	
+					print("Indicator exists - OTX timestamp was newer- adding sighting", end="")
 					try:
-						if ENRICH_EVENT_WITH_PULSE_NAMES:
-							# Put pulse names into references
-							pulses = indicator_details.get("general")["pulse_info"]["pulses"]
-							for pulse in pulses:
-								source = f"{source} OTX Pulse Name: {pulse.get("name")}\n"
-					
-					except NameError:
-						pass
-
-					print("Indicator exists - OTX timestamp was newer- adding sighting")
-					try:
-						response = misp.add_sighting({'id': attribute.id,'source': source,'type': '0'})
+						response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
+						
+						try: 
+							if ENRICH_EVENT_WITH_PULSE_NAMES:
+								# ---- Enumerate MISP tags into a list
+								mtag_names = []
+								mtags = attribute.get('Tag', [])
+								for mtag in mtags:
+									mtag_names.append(mtag['name'])
+								
+								# ---- Enumerate pulse tags and see if they exist in the list
+								pulses = indicator_details.get("general")["pulse_info"]["pulses"]
+								for pulse in pulses:
+									ptag = f"otx-pulse-name:{pulse.get("name")}"
+									if not ptag in mtag_names:
+										misp.tag(attribute.id, ptag)
+										
+										misp_tag = MISPTag()
+										misp_tag.name = ptag
+										print(" - adding missing tags", end="")
+										attribute.tags.append(misp_tag)
+						except NameError:
+							pass
+						except:
+							print(" - failed to create tags", end="")
+						
 					except Exception as e:
-   						print(f"Failed to create sighting - continuing")
+   						print(f"Failed to create sighting - continuing", end="")
+					
+					print()
+				
 				else:
 					print("Indicator exists - OTX timestamp was older or the same - skipping")
 
@@ -293,20 +309,19 @@ for indicator in indicators:
 					misp_attribute.type = misp_type
 					misp_attribute.value = indicator_value
 					misp_attribute.to_ids = True
-					misp_attribute.timestamp = otx_latest_sighting
-					
-					comment = ""
+					misp_attribute.timestamp = datetime.fromtimestamp(otx_latest_sighting)
+									
 					try: 
 						if ENRICH_EVENT_WITH_PULSE_NAMES:
-							# Put pulse names into references
+
+							# Put pulse names into tags
 							pulses = indicator_details.get("general")["pulse_info"]["pulses"]
 							for pulse in pulses:
-								comment = f"{comment} OTX Pulse Name: {pulse.get("name")}\n"
+								tag = f"otx-pulse-name:{pulse.get("name")}"
+								misp_attribute.add_tag(tag)
+					
 					except NameError:
 						pass
-
-
-					misp_attribute.comment = comment
 					
 					misp.add_attribute(EVENT_ID, misp_attribute)
 					
