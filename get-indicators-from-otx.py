@@ -261,7 +261,7 @@ for indicator in indicators:
 				misp_attribute_timestamp  = int(attribute.timestamp.timestamp())
 
 				# ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
-				if otx_created_timestamp > otx_latest_sighting:	
+				if otx_latest_sighting > misp_attribute_timestamp:	
 					print("Indicator exists - OTX timestamp was newer- adding sighting", end="")
 					try:
 						response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
@@ -276,14 +276,14 @@ for indicator in indicators:
 								
 								# ---- Enumerate pulse tags and see if they exist in the list
 								pulses = indicator_details.get("general")["pulse_info"]["pulses"]
+								print(" - adding missing tags", end="")
 								for pulse in pulses:
 									ptag = f"otx-pulse-name:{pulse.get("name")}"
 									if not ptag in mtag_names:
-										misp.tag(attribute.id, ptag)
-										
+										misp.tag(attribute.uuid, ptag)
 										misp_tag = MISPTag()
 										misp_tag.name = ptag
-										print(" - adding missing tags", end="")
+										print(".", end="")
 										attribute.tags.append(misp_tag)
 						except NameError:
 							pass
