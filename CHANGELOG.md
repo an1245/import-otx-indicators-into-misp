@@ -1,3 +1,14 @@
+## v0.5
+
+### Additions
+* Added the ability to enrich the MISP attributes with tags that indicate which OTX pulses the attribute exists in
+
+### Bug fixes
+* Fixed bug in sighting logic.
+
+### Upgrades
+* Upgraded pymisp==2.5.33.2
+
 ## v0.4
 
 ### Additions
