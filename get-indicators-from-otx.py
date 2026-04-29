@@ -80,7 +80,7 @@ try:
 	indicator_count = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
 except Exception as e:
 	print("Caught error when trying to get indicators from OTX: ", e)
-	traceback.print_exc()
+	sys.exit(1)
 
 icount = sum(1 for _ in indicator_count)
 print(f"Processing {icount} OTX indicators into MISP Event ID: {EVENT_ID}")
