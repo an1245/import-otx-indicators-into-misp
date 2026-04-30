@@ -23,6 +23,9 @@ def get_virustotal_domain_score(domain):
 
 		# ---- Extract reputation score and return ----
 		malicious_score = json_obj['data']['attributes']['last_analysis_stats']['malicious']
+		if malicious_score is None:
+			print("VT malicious score was None - returning 1000000 - " , end="")
+			return 1000000   # return a high score so it gets added into MISP
 
 	except Exception as err:
 		print("VirusTotal returned invalid response - check API key!", end="")
@@ -45,6 +48,9 @@ def get_virustotal_ip_score(ip):
 
 		# ---- Extract reputation score and return ----
 		malicious_score = json_obj['data']['attributes']['last_analysis_stats']['malicious']
+		if malicious_score is None:
+			print("VT malicious score was None - returning 1000000 - " , end="")
+			return 1000000     # return a high score so it gets added into MISP
 
 	except Exception as err:
 		print("VirusTotal returned invalid response - check API key!", end="")
