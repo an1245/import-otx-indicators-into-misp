@@ -11,6 +11,9 @@ from pymisp.exceptions import PyMISPError
 # ---- Import Config ----
 from config import *
 
+# ---- Import Util Functions ----
+from util_functions import *
+
 # ---- Import VirusTotal
 from virustotal import *
 
@@ -74,10 +77,14 @@ except Exception as e:
 # ---- Convert import DAYS into a timestamp
 import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
 
+# ---- Create import Types list ----
+indicator_import_list = create_indicator_import_string()
+print(f"Importing Indicator Types: {indicator_import_list}")
+
 # ---- Get new Domain/Hostname indicators from OTX ----
 try:
-	indicators = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
-	indicator_count = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
+	indicators = otx.get_all_indicators(indicator_types=indicator_import_list,modified_since=import_days_tz)
+	indicator_count = otx.get_all_indicators(indicator_types=indicator_import_list,modified_since=import_days_tz)
 except Exception as e:
 	print("Caught error when trying to get indicators from OTX: ", e)
 	sys.exit(1)

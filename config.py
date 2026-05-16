@@ -13,6 +13,11 @@ OTX_API_KEY = "{insert OTX API key}"
 IMPORT_DAYS=1                       # number of days to import.  works best if you import 1 day and run every day
 DECAY_DAYS=120                      # don't import events that are older than x days ( should align with lifetime days in your decay model )
 
+IMPORT_HOSTNAME = True              # Import Hostname indicators (True/False)
+IMPORT_DOMAIN = True                # Import Domain indicators (True/False)
+IMPORT_IPV4 = False                 # Import IPv4 indicators (True/False)
+IMPORT_IPV6 = False                 # Import IPv6 indicators (True/False)
+
 # ---- VirusTotal API Key ----
 VT_API_KEY = "{insert VirusTotal API key}"
 
