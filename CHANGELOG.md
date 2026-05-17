@@ -1,3 +1,11 @@
+## v0.6
+
+### Additions
+* Added the ability to configure what indicators to import
+
+### Upgrades
+* Upgraded urllib3==2.7.0, requests==2.34.2
+
 ## v0.5
 
 ### Additions

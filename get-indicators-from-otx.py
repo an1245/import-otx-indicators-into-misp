@@ -31,6 +31,7 @@ fail_continue_count = 5
 
 # ---- Connect to MISP ----
 try:
+	print(f"Connecting to MISP Server {MISP_URL}")	
 	misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
 	
 except requests.exceptions.ConnectionError as e:
@@ -48,6 +49,7 @@ except Exception as e:
 try:
 	if AUTO_GENERATE_NEW_EVENT:
 		try:
+			print("AUTO_GENERATE_NEW_EVENT was True - creating new event in MISP")	
 			event = MISPEvent()
 			event.info = "Imported indicators from LevelBlue Open Threat Exchange "
 			event.distribution = 0  		# Your organization only
@@ -69,6 +71,7 @@ except NameError:
 
 # ---- Get event with attributes ----
 try:
+	print(f"Fetching Event {EVENT_ID} from MISP")	
 	event = misp.get_event(EVENT_ID, pythonify=True)
 except Exception as e:
 	print(f"Failed to get Event ID from MISP: Error: {e}")
@@ -79,7 +82,6 @@ import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
 
 # ---- Create import Types list ----
 indicator_import_list = create_indicator_import_string()
-print(f"Importing Indicator Types: {indicator_import_list}")
 
 # ---- Get new Domain/Hostname indicators from OTX ----
 try:
