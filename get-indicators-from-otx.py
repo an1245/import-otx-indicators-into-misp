@@ -43,6 +43,16 @@ except Exception as e:
 	print(f"Failed to connect to MISP Server: An unexpected error occurred: {e}")
 	sys.exit(1)
 	
+# ---- Check if AUTO_GENERATE_NEW_EVENT exists in config and if it doesn't them define it as False
+try:
+	LOCAL_AUTO_GENERATE_NEW_EVENT = AUTO_GENERATE_NEW_EVENT
+except NameError:
+	LOCAL_AUTO_GENERATE_NEW_EVENT = False
+
+# ---- If LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID is 0 then there is a problem
+if LOCAL_AUTO_GENERATE_NEW_EVENT == False and EVENT_ID == 0:
+	print("Config.py entries AUTO_GENERATE_NEW_EVENT = False and EVENT_ID = 0 - incorrect config - check config - exiting")
+	sys.exit(1)
 
 # ---- Generate new event if AUTO_GENERATE_NEW_EVENT is True ----
 try:
