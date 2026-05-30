@@ -8,7 +8,7 @@ ENRICH_EVENT_WITH_PULSE_NAMES = False                               # if ENRICH_
 ADD_IP_SRC_FOR_EACH_OTX_IP = False                                  # by defailt, the script will only add an ip-dst attribute for each IP type OTX event.  If set to True it will create ip-src attribute also.
 
 # ---- OTX Configuration ----
-OTX_API_KEY = "{insert OTX API key}" 
+OTX_API_KEY = "{insert OTX API key}"
 
 # ---- Skip validation settings
 SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = False                    # If set to True, Whitelist Validation and Indicator enrichment will not take place

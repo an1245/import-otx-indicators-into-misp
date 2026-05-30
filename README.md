@@ -55,12 +55,13 @@ vi config.py
 MISP_URL = "{insert MISP url}"
 MISP_API_KEY = "{insert MISP API key}"
 MISP_VERIFY_CERT = False
-EVENT_ID = {insert MISP Event ID}                                   # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
+EVENT_ID = 0                                                        # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
 AUTO_GENERATE_NEW_EVENT = False                                     # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be configured and indicators added to that event
 ENRICH_EVENT_WITH_PULSE_NAMES = False                               # if ENRICH_EVENT_WITH_PULSE_NAMES is set to True, an attribute tag will be created for each pulse name that the indicator exists in
+ADD_IP_SRC_FOR_EACH_OTX_IP = False                                  # by defailt, the script will only add an ip-dst attribute for each IP type OTX event.  If set to True it will create ip-src attribute also.
 
 # ---- OTX Configuration ----
-OTX_API_KEY = "{insert OTX API key}" 
+OTX_API_KEY = "{insert OTX API key}"
 
 # ---- Skip validation settings
 SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = False                    # If set to True, Whitelist Validation and Indicator enrichment will not take place

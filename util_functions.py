@@ -1,20 +1,20 @@
-# ---- Import Config ----
-from config import *
+# ---- Import Dependencies
+from datetime import datetime, timedelta, timezone
+import time
+import sys
+import json
+import requests.exceptions
 
 # ---- OTX Configuration ----
 from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
 
-# ---- Import Dependencies
-from datetime import datetime, timedelta, timezone
-import time
-import requests.exceptions
-import sys
-import json
-
 # ---- Import PyMISP ----
 from pymisp import PyMISP, MISPEvent, MISPAttribute, MISPTag
 from pymisp.exceptions import PyMISPError
+
+# ---- Import Config ----
+from config import *
 
 # ---- Set continue on fail threshold ----
 fail_continue_count = 5
@@ -92,7 +92,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
     match indicator_type:
         case "IPv4":
             misp_type = "ip"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT == False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:
                     try:
@@ -109,19 +109,17 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
                 else:
                         print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
                         # Create a JSON object for it.
-                        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                         json_string = fallback_json_string
                         indicator_details = json.loads(json_string)
             else:
                 # Create a JSON object for it.
-                print("Skip whitelist validation:", end="")
-                now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                print("Skip whitelist validation - ", end="")
                 json_string = fallback_json_string
                 indicator_details = json.loads(json_string)
 
         case "IPv6":
             misp_type = "ip"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT == False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:				
                     try:
@@ -138,19 +136,17 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
                 else:
                     print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
                     # Create a JSON object for it
-                    now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                     json_string = fallback_json_string
                     indicator_details = json.loads(json_string)
             else:
                 # Create a JSON object for it.
-                print("Skip whitelist validation:", end="")
-                now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                print("Skip whitelist validation - ", end="")
                 json_string = fallback_json_string
                 indicator_details = json.loads(json_string)
 
         case "domain":
             misp_type = "domain"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT == False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:
                     try:
@@ -167,18 +163,16 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
                 else:
                     print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
                     # Create a JSON object for it.
-                    now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                     json_string = fallback_json_string
                     indicator_details = json.loads(json_string)
             else:
                 # Create a JSON object for it.
-                print("Skip whitelist validation:", end="")
-                now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                print("Skip whitelist validation - ", end="")
                 json_string = fallback_json_string
                 indicator_details = json.loads(json_string)
         case "hostname":
             misp_type = "hostname"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT == False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:
                     try:
@@ -195,13 +189,11 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
                 else:
                     print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
                     # Create a JSON object for it.
-                    now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                     json_string = fallback_json_string
                     indicator_details = json.loads(json_string)
             else:
                 # Create a JSON object for it.
-                print("Skip whitelist validation:", end="")
-                now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                print("Skip whitelist validation - ", end="")
                 json_string = fallback_json_string
                 indicator_details = json.loads(json_string)
         case _:
@@ -226,8 +218,8 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 				if otx_latest_sighting > misp_attribute_timestamp:	
 					print("Indicator exists - OTX timestamp was newer- adding sighting", end="")
 					try:
-						response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
-						
+						misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
+
 						try: 
 							if ENRICH_EVENT_WITH_PULSE_NAMES:
 								# ---- Enumerate MISP tags into a list
@@ -249,11 +241,11 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 										attribute.tags.append(misp_tag)
 						except NameError:
 							pass
-						except:
+						except Exception:
 							print(" - failed to create tags", end="")
 						
 					except Exception as e:
-   						print(f"Failed to create sighting - continuing", end="")
+   						print(f"Failed to create sighting - continuing - err: {e}", end="")
 					
 					print()
 				
@@ -291,6 +283,6 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 					event.attributes.append(misp_attribute)
 
 				except Exception as e:
-   						print(f"Failed to create attribute - continuing", e)
+   						print(f"Failed to create attribute - continuing - err: {e}")
 			else:
 				print("Indicator ts > decay_days ts - skipping ")

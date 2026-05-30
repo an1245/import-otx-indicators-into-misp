@@ -1,17 +1,11 @@
 # ---- Datetime for time conversions ----
 from datetime import datetime, timedelta, timezone
-import time
-import requests.exceptions
 import sys
-import json
-
+import requests.exceptions
 
 # ---- Import PyMISP ----
-from pymisp import PyMISP, MISPEvent, MISPAttribute, MISPTag
+from pymisp import PyMISP, MISPEvent
 from pymisp.exceptions import PyMISPError
-
-# ---- Import Config ----
-from config import *
 
 # ---- Import Util Functions ----
 from util_functions import *
@@ -26,6 +20,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ---- OTX Configuration ----
 from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
+
+# ---- Import Config ----
+from config import *
+
 otx = OTXv2(OTX_API_KEY)
 
 # ---- Connect to MISP ----
@@ -50,7 +48,7 @@ except NameError:
 	LOCAL_AUTO_GENERATE_NEW_EVENT = False
 
 # ---- If LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID is 0 then there is a problem
-if LOCAL_AUTO_GENERATE_NEW_EVENT == False and EVENT_ID == 0:
+if LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID == 0:
 	print("Config.py entries AUTO_GENERATE_NEW_EVENT = False and EVENT_ID = 0 - incorrect config - check config - exiting")
 	sys.exit(1)
 
@@ -72,7 +70,7 @@ try:
 			sys.exit(1)
 	else:
 		if not isinstance(EVENT_ID, (int)):
-			print(f"EVENT ID is not a number and AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
+			print("EVENT ID is not a number and AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
 			sys.exit(1)
 except NameError:
 	print("AUTO_GENERATE_NEW_EVENT variable is not set in the configuration - check documentation.")
@@ -135,7 +133,7 @@ for indicator in indicators:
 		print("In OTX whitelist - ", end="")
 
 		# ---- Get reputation score from VirusTotal ----
-		if misp_type == "domain" or misp_type == "hostname":
+		if misp_type in ('domain', 'hostname'):
 			vt_malicious_score = get_virustotal_domain_score(indicator_value)
 		elif misp_type == "ip":
 			vt_malicious_score = get_virustotal_ip_score(indicator_value)
@@ -185,7 +183,7 @@ for indicator in indicators:
 	# ---- OK, process the indicator ---
 	if indicator_value:
 		
-		if misp_type == "domain" or misp_type == "hostname":
+		if misp_type in ('domain', 'hostname'):
 			
 			# ---- Process a Domain/Hostname indicator as normal
 			processIndicator(misp, event, misp_type, indicator_value, indicator_details, otx_latest_sighting, decay_unixtimestamp)
@@ -202,7 +200,7 @@ for indicator in indicators:
 			except NameError:
 				LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP = False
 
-			if LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP == True:
+			if LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP is True:
 				processIndicator(misp, event, "ip-src", indicator_value, indicator_details, otx_latest_sighting, decay_unixtimestamp)
 
 
@@ -212,4 +210,4 @@ print("Publishing Event")
 try:
 	misp.publish(EVENT_ID, alert=False)
 except Exception as e:
-	print(f"Failed to publish MISP event!")
+	print(f"Failed to publish MISP event! err:{e}")
