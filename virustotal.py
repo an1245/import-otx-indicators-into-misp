@@ -1,5 +1,5 @@
-import requests.exceptions
 import json
+import requests.exceptions
 
 # ---- Import Config ----
 from config import *
@@ -28,7 +28,7 @@ def get_virustotal_domain_score(domain):
 			return 1000000   # return a high score so it gets added into MISP
 
 	except Exception as err:
-		print("VirusTotal returned invalid response - check API key!", end="")
+		print(f"VirusTotal returned invalid response - check API key! {err}", end="")
 		return 1000000    # return a high score so it gets added into MISP
 
 	return malicious_score
@@ -53,8 +53,7 @@ def get_virustotal_ip_score(ip):
 			return 1000000     # return a high score so it gets added into MISP
 
 	except Exception as err:
-		print("VirusTotal returned invalid response - check API key!", end="")
+		print(f"VirusTotal returned invalid response - check API key! {err}", end="")
 		return 1000000    # return a high score so it gets added into MISP
 
 	return malicious_score
-

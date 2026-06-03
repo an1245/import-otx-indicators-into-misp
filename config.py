@@ -2,19 +2,29 @@
 MISP_URL = "{insert MISP url}"
 MISP_API_KEY = "{insert MISP API key}"
 MISP_VERIFY_CERT = False
-EVENT_ID = {insert MISP Event ID}          # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
-AUTO_GENERATE_NEW_EVENT = False            # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be configured and indicators added to that event
-ENRICH_EVENT_WITH_PULSE_NAMES = False      # if ENRICH_EVENT_WITH_PULSE_NAMES is set to True, an attribute tag will be created for each pulse name that the indicator exists in
+EVENT_ID = 0                                                        # if AUTO_GENERATE_NEW_EVENT is set to False, indicators will be written to this EVENT_ID
+AUTO_GENERATE_NEW_EVENT = False                                     # if AUTO_GENERATE_NEW_EVENT is set to True, a new event will be configured and indicators added to that event
+ENRICH_EVENT_WITH_PULSE_NAMES = False                               # if ENRICH_EVENT_WITH_PULSE_NAMES is set to True, an attribute tag will be created for each pulse name that the indicator exists in
+ADD_IP_SRC_FOR_EACH_OTX_IP = False                                  # by defailt, the script will only add an ip-dst attribute for each IP type OTX event.  If set to True it will create ip-src attribute also.
 
 # ---- OTX Configuration ----
-OTX_API_KEY = "{insert OTX API key}" 
+OTX_API_KEY = "{insert OTX API key}"
+
+# ---- Skip validation settings
+SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = False                    # If set to True, Whitelist Validation and Indicator enrichment will not take place
+SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD = 100000         # If the number of indicators to be processed is great than this number, Whitelist Validation and Indicator enrichment will not take place
 
 # ---- Import Configuration ----
-IMPORT_DAYS=1                       # number of days to import.  works best if you import 1 day and run every day
-DECAY_DAYS=120                      # don't import events that are older than x days ( should align with lifetime days in your decay model )
+IMPORT_DAYS=1                                                       # number of days to import.  works best if you import 1 day and run every day
+DECAY_DAYS=120                                                      # don't import events that are older than x days ( should align with lifetime days in your decay model )
+
+IMPORT_HOSTNAME = True                                              # Import Hostname indicators (True/False)
+IMPORT_DOMAIN = True                                                # Import Domain indicators (True/False)
+IMPORT_IPV4 = False                                                 # Import IPv4 indicators (True/False)
+IMPORT_IPV6 = False                                                 # Import IPv6 indicators (True/False)
 
 # ---- VirusTotal API Key ----
 VT_API_KEY = "{insert VirusTotal API key}"
 
 # ---- VirusTotal Malicious Score Limit ----
-VT_MALICIOUS_THRESHOLD = 2          # if the malicious score is greater than this number, include it.
+VT_MALICIOUS_THRESHOLD = 2                                          # if the malicious score is greater than this number, include it.

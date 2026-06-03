@@ -1,3 +1,21 @@
+## v0.6
+
+### Additions
+* Added the ability to configure what indicators to import
+* Added the ability to skip validation and enrichment
+* Move fetch indicator details code into fetch_indicator_details() function
+* Moved process indicator code into processIndicator() function
+* Added option to add ip-src and ip-dst indicator into MISP
+* Explicitly import json in get-indicators-from-otx.py
+
+### Bug fixes
+* Fixed bug in otx-pulse-name tag which was causing compile failure
+* Changed fallback url/pns dates in json_string to unix time 0
+* Correctly align the comments in config.py
+
+### Upgrades
+* Upgraded urllib3==2.7.0, requests==2.34.2
+
 ## v0.5
 
 ### Additions

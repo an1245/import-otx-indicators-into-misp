@@ -1,15 +1,14 @@
 # ---- Datetime for time conversions ----
 from datetime import datetime, timedelta, timezone
-import time
-import requests.exceptions
 import sys
+import requests.exceptions
 
 # ---- Import PyMISP ----
-from pymisp import PyMISP, MISPEvent, MISPAttribute, MISPTag
+from pymisp import PyMISP, MISPEvent
 from pymisp.exceptions import PyMISPError
 
-# ---- Import Config ----
-from config import *
+# ---- Import Util Functions ----
+from util_functions import *
 
 # ---- Import VirusTotal
 from virustotal import *
@@ -21,13 +20,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ---- OTX Configuration ----
 from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
-otx = OTXv2(OTX_API_KEY)
 
-# ---- Set continue on fail threshold ----
-fail_continue_count = 5
+# ---- Import Config ----
+from config import *
+
+otx = OTXv2(OTX_API_KEY)
 
 # ---- Connect to MISP ----
 try:
+	print(f"Connecting to MISP Server {MISP_URL}")	
 	misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
 	
 except requests.exceptions.ConnectionError as e:
@@ -40,11 +41,22 @@ except Exception as e:
 	print(f"Failed to connect to MISP Server: An unexpected error occurred: {e}")
 	sys.exit(1)
 	
+# ---- Check if AUTO_GENERATE_NEW_EVENT exists in config and if it doesn't them define it as False
+try:
+	LOCAL_AUTO_GENERATE_NEW_EVENT = AUTO_GENERATE_NEW_EVENT
+except NameError:
+	LOCAL_AUTO_GENERATE_NEW_EVENT = False
+
+# ---- If LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID is 0 then there is a problem
+if LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID == 0:
+	print("Config.py entries AUTO_GENERATE_NEW_EVENT = False and EVENT_ID = 0 - incorrect config - check config - exiting")
+	sys.exit(1)
 
 # ---- Generate new event if AUTO_GENERATE_NEW_EVENT is True ----
 try:
 	if AUTO_GENERATE_NEW_EVENT:
 		try:
+			print("AUTO_GENERATE_NEW_EVENT was True - creating new event in MISP")	
 			event = MISPEvent()
 			event.info = "Imported indicators from LevelBlue Open Threat Exchange "
 			event.distribution = 0  		# Your organization only
@@ -58,7 +70,7 @@ try:
 			sys.exit(1)
 	else:
 		if not isinstance(EVENT_ID, (int)):
-			print(f"EVENT ID is not a number and AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
+			print("EVENT ID is not a number and AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
 			sys.exit(1)
 except NameError:
 	print("AUTO_GENERATE_NEW_EVENT variable is not set in the configuration - check documentation.")
@@ -66,6 +78,7 @@ except NameError:
 
 # ---- Get event with attributes ----
 try:
+	print(f"Fetching Event {EVENT_ID} from MISP")	
 	event = misp.get_event(EVENT_ID, pythonify=True)
 except Exception as e:
 	print(f"Failed to get Event ID from MISP: Error: {e}")
@@ -74,10 +87,14 @@ except Exception as e:
 # ---- Convert import DAYS into a timestamp
 import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
 
+# ---- Create import Types list ----
+indicator_import_list = create_indicator_import_string()
+
 # ---- Get new Domain/Hostname indicators from OTX ----
 try:
-	indicators = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
-	indicator_count = otx.get_all_indicators(indicator_types=[IndicatorTypes.DOMAIN,IndicatorTypes.HOSTNAME],modified_since=import_days_tz)
+	print(f"Fetching OTX indicators modified since {import_days_tz}")
+	indicators = otx.get_all_indicators(indicator_types=indicator_import_list,modified_since=import_days_tz)
+	indicator_count = otx.get_all_indicators(indicator_types=indicator_import_list,modified_since=import_days_tz)
 except Exception as e:
 	print("Caught error when trying to get indicators from OTX: ", e)
 	sys.exit(1)
@@ -96,100 +113,14 @@ for indicator in indicators:
 	otx_type = ""
 	indicator_value = indicator.get("indicator","")
 	print(f"Processing {count}/{icount}: {indicator_value} : ", end="")
-	indicator_details = ""
-
-	# ---- Get the indicator_details_full section for each indicator ----
-	match indicator_type:
-		case "IPv4":
-			misp_type = "ip-dst"
-			fail_count = 0
-			while fail_count < fail_continue_count:
-				try:
-					print("fetching details (IPv4): ", end="")
-					indicator_details = otx.get_indicator_details_full(IndicatorTypes.IPv4, indicator_value)
-					break
-				except Exception as e:
-					fail_count = fail_count + 1
-					print("Caught error: ", e, end="")
-					print("Sleeping 2 mins: ", end="")
-					time.sleep(120)
-					print("Retrying(", fail_count,"):", end="")
-					continue
-			else:
-				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
-				# Create a JSON object for it.
-				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
-				indicator_details = json.loads(json_string)
-
-		case "IPv6":
-			misp_type = "ip-dst"
-			fail_count = 0
-			while fail_count < fail_continue_count:				
-				try:
-					print("fetching details (IPv6): ", end="")
-					indicator_details = otx.get_indicator_details_full(IndicatorTypes.IPv6, indicator_value)
-					break
-				except Exception as e:
-					fail_count = fail_count + 1
-					print("Caught error: ", e, end="")
-					print("Sleeping 2 mins:", end="")
-					time.sleep(120)
-					print("Retrying(", fail_count,"):", end="")
-					continue
-			else:
-				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
-				# Create a JSON object for it.
-				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
-				indicator_details = json.loads(json_string)
-
-		case "domain":
-			misp_type = "domain"
-			fail_count = 0
-			while fail_count < fail_continue_count:
-				try:
-					print("fetching details (domain): ", end="")
-					indicator_details = otx.get_indicator_details_full(IndicatorTypes.DOMAIN, indicator_value)
-					break
-				except Exception as e:
-					fail_count = fail_count + 1
-					print("Caught error: ", e, end="")
-					print("Sleeping 2 mins:", end="")
-					time.sleep(120)
-					print("Retrying(", fail_count,"):", end="")
-					continue
-			else:
-				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
-				# Create a JSON object for it.
-				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
-				indicator_details = json.loads(json_string)
-
-		case "hostname":
-			misp_type = "hostname"
-			fail_count = 0
-			while fail_count < fail_continue_count:
-				try:
-					print("fetching details (hostname): ", end="")
-					indicator_details = otx.get_indicator_details_full(IndicatorTypes.HOSTNAME, indicator_value)
-					break
-				except Exception as e:
-					fail_count = fail_count + 1
-					print("Caught error: ", e, end="")
-					print("Sleeping 2 mins:", end="")
-					time.sleep(120)
-					print("Retrying(", fail_count,"):", end="")
-					continue
-			else:
-				print("Failed to collect indicator details - Creating JSON Object for entry:", end="")
-				# Create a JSON object for it.
-				now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-				json_string = '{"general": {"validation": []}, "url_list": {"url_list": [{"date": "' + str(now) + '"}]}, "passive_dns": {"passive_dns": [{"last": "' + str(now) + '"}]}}'
-				indicator_details = json.loads(json_string)
-
-		case _:
-		        continue
+	
+	# ---- Fetch indicator details from OTX
+	misp_type, indicator_details = fetch_indicator_details(otx, indicator_type,indicator_value, icount )
+	
+	# ---- If the OTX indicator isn't an IP, Domain or Hostname, continue to next indicator
+	if misp_type == "":
+		continue
+	
 
 	# ---- Check if the indicator is in a whitelist and if so bypass it ----
 	validation = indicator_details.get("general")["validation"]
@@ -202,9 +133,9 @@ for indicator in indicators:
 		print("In OTX whitelist - ", end="")
 
 		# ---- Get reputation score from VirusTotal ----
-		if misp_type == "domain" or misp_type == "hostname":
+		if misp_type in ('domain', 'hostname'):
 			vt_malicious_score = get_virustotal_domain_score(indicator_value)
-		elif misp_type == "ip-dst":
+		elif misp_type == "ip":
 			vt_malicious_score = get_virustotal_ip_score(indicator_value)
 		else:
 			vt_malicious_score = 0
@@ -251,91 +182,32 @@ for indicator in indicators:
 
 	# ---- OK, process the indicator ---
 	if indicator_value:
+		
+		if misp_type in ('domain', 'hostname'):
+			
+			# ---- Process a Domain/Hostname indicator as normal
+			processIndicator(misp, event, misp_type, indicator_value, indicator_details, otx_latest_sighting, decay_unixtimestamp)
+		
+		elif misp_type == "ip":	
+			
+			# ---- Add ip-dst attribute type into MISP
+			processIndicator(misp, event, "ip-dst", indicator_value, indicator_details, otx_latest_sighting, decay_unixtimestamp)
 
-		# ---- Check if indicator exists already in MISP ----
-		found = False
-		for attribute in event.attributes:
-			if attribute.value == indicator_value:
-				found = True
 
-				misp_attribute_timestamp  = int(attribute.timestamp.timestamp())
+			# ---- If ADD_IP_SRC_FOR_EACH_OTX_IP == True in config.py, add ip-src attribute in MISP
+			try:
+				LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP = ADD_IP_SRC_FOR_EACH_OTX_IP
+			except NameError:
+				LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP = False
 
-				# ---- If the OTX timestamp is greater than the attribute timestamp then add a sighting
-				if otx_latest_sighting > misp_attribute_timestamp:	
-					print("Indicator exists - OTX timestamp was newer- adding sighting", end="")
-					try:
-						response = misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
-						
-						try: 
-							if ENRICH_EVENT_WITH_PULSE_NAMES:
-								# ---- Enumerate MISP tags into a list
-								mtag_names = []
-								mtags = attribute.get('Tag', [])
-								for mtag in mtags:
-									mtag_names.append(mtag['name'])
-								
-								# ---- Enumerate pulse tags and see if they exist in the list
-								pulses = indicator_details.get("general")["pulse_info"]["pulses"]
-								print(" - adding missing tags", end="")
-								for pulse in pulses:
-									ptag = f"otx-pulse-name:{pulse.get("name")}"
-									if not ptag in mtag_names:
-										misp.tag(attribute.uuid, ptag)
-										misp_tag = MISPTag()
-										misp_tag.name = ptag
-										print(".", end="")
-										attribute.tags.append(misp_tag)
-						except NameError:
-							pass
-						except:
-							print(" - failed to create tags", end="")
-						
-					except Exception as e:
-   						print(f"Failed to create sighting - continuing", end="")
-					
-					print()
-				
-				else:
-					print("Indicator exists - OTX timestamp was older or the same - skipping")
+			if LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP is True:
+				processIndicator(misp, event, "ip-src", indicator_value, indicator_details, otx_latest_sighting, decay_unixtimestamp)
 
-		# ---- If the attribute doesn't exist then add it ----
-		if not found:
 
-			# ---- Only add indicator if it's greater than decay_unix_timestamp ----
-			if otx_latest_sighting >=  decay_unixtimestamp:
-				print("Indicator didn't exist - Adding attribute ")
-				try:
-					misp_attribute = MISPAttribute()
-					misp_attribute.type = misp_type
-					misp_attribute.value = indicator_value
-					misp_attribute.to_ids = True
-					misp_attribute.timestamp = datetime.fromtimestamp(otx_latest_sighting)
-									
-					try: 
-						if ENRICH_EVENT_WITH_PULSE_NAMES:
-
-							# Put pulse names into tags
-							pulses = indicator_details.get("general")["pulse_info"]["pulses"]
-							for pulse in pulses:
-								tag = f"otx-pulse-name:{pulse.get("name")}"
-								misp_attribute.add_tag(tag)
-					
-					except NameError:
-						pass
-					
-					misp.add_attribute(EVENT_ID, misp_attribute)
-					
-					# Add to event.attributes list so that if we find a duplicate entry in this run, we make a sighting
-					event.attributes.append(misp_attribute)
-
-				except Exception as e:
-   						print(f"Failed to create attribute - continuing", e)
-			else:
-				print("Indicator ts > decay_days ts - skipping ")
 
 # ---- Publish the event ----
 print("Publishing Event")
 try:
 	misp.publish(EVENT_ID, alert=False)
 except Exception as e:
-	print(f"Failed to publish MISP event!")
+	print(f"Failed to publish MISP event! err:{e}")
