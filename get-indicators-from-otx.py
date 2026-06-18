@@ -115,7 +115,7 @@ for indicator in indicators:
 	print(f"Processing {count}/{icount}: {indicator_value} : ", end="")
 	
 	# ---- Fetch indicator details from OTX
-	misp_type, indicator_details = fetch_indicator_details(otx, indicator_type,indicator_value, icount )
+	misp_type, indicator_details = fetch_indicator_details(otx, indicator_type,indicator_value, icount, count )
 	
 	# ---- If the OTX indicator isn't an IP, Domain or Hostname, continue to next indicator
 	if misp_type == "":

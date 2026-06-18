@@ -1,3 +1,9 @@
+## v0.7
+
+### Bug fixes
+* Added *id* to MISPAttribute before adding to *event* as it was breaking *add_sighting* logic
+* Code now evaluates *icount* and *count* and skips validation if either are greater than *SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD*
+
 ## v0.6
 
 ### Additions
