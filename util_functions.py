@@ -279,8 +279,8 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 					
 					misp_attribute_add = misp.add_attribute(EVENT_ID, misp_attribute)
                     
-                    # Set the misp_attribute.id to the id returned from add_attribute call
-                    misp_attribute.id = misp_attribute_add["Attribute"]["id"]
+					# Set the misp_attribute.id to the id returned from add_attribute call
+					misp_attribute.id = misp_attribute_add["Attribute"]["id"]
                 
 					# Add to event.attributes list so that if we find a duplicate entry in this run, we make a sighting
 					event.attributes.append(misp_attribute)
