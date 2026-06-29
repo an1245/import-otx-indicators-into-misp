@@ -76,7 +76,7 @@ def create_indicator_import_string():
 
 
 # ---- Function to fetch indicator details from OTX
-def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
+def fetch_indicator_details(otx, indicator_type,indicator_value, icount, count ):
     
     try:
         LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT
@@ -92,7 +92,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
     match indicator_type:
         case "IPv4":
             misp_type = "ip"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD and count < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:
                     try:
@@ -119,7 +119,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
 
         case "IPv6":
             misp_type = "ip"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD and count < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:				
                     try:
@@ -146,7 +146,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
 
         case "domain":
             misp_type = "domain"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD and count < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:
                     try:
@@ -172,7 +172,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount ):
                 indicator_details = json.loads(json_string)
         case "hostname":
             misp_type = "hostname"
-            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
+            if LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is False and icount < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD and count < LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD:
                 fail_count = 0
                 while fail_count < fail_continue_count:
                     try:
@@ -277,8 +277,11 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 					except NameError:
 						pass
 					
-					misp.add_attribute(EVENT_ID, misp_attribute)
-					
+					misp_attribute_add = misp.add_attribute(EVENT_ID, misp_attribute)
+                    
+					# Set the misp_attribute.id to the id returned from add_attribute call
+					misp_attribute.id = misp_attribute_add["Attribute"]["id"]
+                
 					# Add to event.attributes list so that if we find a duplicate entry in this run, we make a sighting
 					event.attributes.append(misp_attribute)
 
