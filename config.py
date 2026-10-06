@@ -13,6 +13,7 @@ OTX_API_KEY = "{insert OTX API key}"
 # ---- Skip validation settings
 SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = False                    # If set to True, Whitelist Validation and Indicator enrichment will not take place
 SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD = 100000         # If the number of indicators to be processed is great than this number, Whitelist Validation and Indicator enrichment will not take place
+WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = 10               # Maximum number of Whitelist validation failures before SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT is set to True
 
 # ---- Import Configuration ----
 IMPORT_DAYS=1                                                       # number of days to import.  works best if you import 1 day and run every day

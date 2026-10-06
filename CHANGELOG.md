@@ -1,3 +1,12 @@
+## v0.8
+
+### Additions
+*  SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT if the number of failed attempts exceeded WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES 
+*  Refactored *from config import* to *import config* to monitor failed attempts across entire job
+
+### Upgrades
+* Upgraded urllib3==2.8.0, pymisp==2.5.34.4
+
 ## v0.7
 
 ### Bug fixes

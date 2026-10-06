@@ -2,7 +2,7 @@ import json
 import requests.exceptions
 
 # ---- Import Config ----
-from config import *
+import config
 
 # ---- Disable Certificate Warnings ----
 import urllib3
@@ -13,7 +13,7 @@ def get_virustotal_domain_score(domain):
 
 	# ---- Prepare the URL ----
 	url = f"https://www.virustotal.com/api/v3/domains/{domain}"
-	headers = { "accept": "application/json", "X-ApiKey": VT_API_KEY}
+	headers = { "accept": "application/json", "X-ApiKey": config.VT_API_KEY}
 
 	# ---- Execute request and parse response ----
 	try:
@@ -38,7 +38,7 @@ def get_virustotal_ip_score(ip):
 
 	# ---- Prepare the URL ----
 	url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip}"
-	headers = { "accept": "application/json", "X-ApiKey": VT_API_KEY}
+	headers = { "accept": "application/json", "X-ApiKey": config.VT_API_KEY}
 
 	# ---- Execute request and parse response ----
 	try:

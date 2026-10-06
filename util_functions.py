@@ -14,7 +14,7 @@ from pymisp import PyMISP, MISPEvent, MISPAttribute, MISPTag
 from pymisp.exceptions import PyMISPError
 
 # ---- Import Config ----
-from config import *
+import config
 
 # ---- Set continue on fail threshold ----
 fail_continue_count = 5
@@ -27,7 +27,7 @@ def create_indicator_import_string():
 
     # ---- Check if IMPORT_HOSTNAME exists and is true
     try:
-        if IMPORT_HOSTNAME:
+        if config.IMPORT_HOSTNAME:
             print("Importing Hostname indicators from OTX")
             indicator_import_list.append(IndicatorTypes.HOSTNAME)
                       
@@ -37,7 +37,7 @@ def create_indicator_import_string():
     
     # ---- Check if IMPORT_DOMAIN exists and is true
     try:
-        if IMPORT_DOMAIN:
+        if config.IMPORT_DOMAIN:
             print("Importing Domain indicators from OTX")
             indicator_import_list.append(IndicatorTypes.DOMAIN)
                       
@@ -47,7 +47,7 @@ def create_indicator_import_string():
 
     # ---- Check if IMPORT_IPV4 exists and is true
     try:
-        if IMPORT_IPV4:
+        if config.IMPORT_IPV4:
             print("Importing IPV4 indicators from OTX")
             indicator_import_list.append(IndicatorTypes.IPv4)
                       
@@ -57,7 +57,7 @@ def create_indicator_import_string():
 
     # ---- Check if IMPORT_IPV6 exists and is true
     try:
-        if IMPORT_IPV6:
+        if config.IMPORT_IPV6:
             print("Importing IPV6 indicators from OTX")
             indicator_import_list.append(IndicatorTypes.IPv6)
                       
@@ -79,12 +79,24 @@ def create_indicator_import_string():
 def fetch_indicator_details(otx, indicator_type,indicator_value, icount, count ):
     
     try:
-        LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT
-        LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD = SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD
+        LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = config.SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT
+        LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD = config.SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD
+        
     except NameError:
         LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = False
         LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT_THRESHOLD = 100000
-    
+            
+    try:
+        LOCAL_WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES
+    except NameError:
+        config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = 10               # Default is 10 failures
+              
+
+    # ---- If there has been 10 failures getting otx.get_indicator_details_full from OTX, disable this requests ----
+    if config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES <= 0:
+        LOCAL_SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = True
+        config.SKIP_WHITELIST_VALIDATION_AND_ENRICHMENT = True
+
     indicator_details = ""
     fallback_json_string = '{"general": {"validation": [], "pulse_info": {"pulses": [] }}, "url_list": {"url_list": [{"date": "1970-01-01T00:00:00Z"}]}, "passive_dns": {"passive_dns": [{"last": "1970-01-01T00:00:00Z"}]}}'
     
@@ -111,6 +123,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount, count )
                         # Create a JSON object for it.
                         json_string = fallback_json_string
                         indicator_details = json.loads(json_string)
+                        config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES - 1
             else:
                 # Create a JSON object for it.
                 print("Skip whitelist validation - ", end="")
@@ -138,6 +151,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount, count )
                     # Create a JSON object for it
                     json_string = fallback_json_string
                     indicator_details = json.loads(json_string)
+                    config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES - 1
             else:
                 # Create a JSON object for it.
                 print("Skip whitelist validation - ", end="")
@@ -165,6 +179,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount, count )
                     # Create a JSON object for it.
                     json_string = fallback_json_string
                     indicator_details = json.loads(json_string)
+                    config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES - 1
             else:
                 # Create a JSON object for it.
                 print("Skip whitelist validation - ", end="")
@@ -191,6 +206,7 @@ def fetch_indicator_details(otx, indicator_type,indicator_value, icount, count )
                     # Create a JSON object for it.
                     json_string = fallback_json_string
                     indicator_details = json.loads(json_string)
+                    config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES = config.WHITELIST_VALIDATION_AND_ENRICHMENT_MAX_FAILURES - 1
             else:
                 # Create a JSON object for it.
                 print("Skip whitelist validation - ", end="")
@@ -221,7 +237,7 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 						misp.add_sighting({'id': attribute.id,'source': 'OTX Feed','type': '0'})
 
 						try: 
-							if ENRICH_EVENT_WITH_PULSE_NAMES:
+							if config.ENRICH_EVENT_WITH_PULSE_NAMES:
 								# ---- Enumerate MISP tags into a list
 								mtag_names = []
 								mtags = attribute.get('Tag', [])
@@ -266,7 +282,7 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 					misp_attribute.timestamp = datetime.fromtimestamp(otx_latest_sighting)
 									
 					try: 
-						if ENRICH_EVENT_WITH_PULSE_NAMES:
+						if config.ENRICH_EVENT_WITH_PULSE_NAMES:
 
 							# Put pulse names into tags
 							pulses = indicator_details.get("general")["pulse_info"]["pulses"]
@@ -277,7 +293,7 @@ def processIndicator(misp, event, misp_type, indicator_value, indicator_details,
 					except NameError:
 						pass
 					
-					misp_attribute_add = misp.add_attribute(EVENT_ID, misp_attribute)
+					misp_attribute_add = misp.add_attribute(config.EVENT_ID, misp_attribute)
                     
 					# Set the misp_attribute.id to the id returned from add_attribute call
 					misp_attribute.id = misp_attribute_add["Attribute"]["id"]

@@ -22,14 +22,14 @@ from OTXv2 import OTXv2
 from OTXv2 import IndicatorTypes
 
 # ---- Import Config ----
-from config import *
+import config
 
-otx = OTXv2(OTX_API_KEY)
+otx = OTXv2(config.OTX_API_KEY)
 
 # ---- Connect to MISP ----
 try:
-	print(f"Connecting to MISP Server {MISP_URL}")	
-	misp = PyMISP(MISP_URL, MISP_API_KEY, MISP_VERIFY_CERT)
+	print(f"Connecting to MISP Server {config.MISP_URL}")	
+	misp = PyMISP(config.MISP_URL, config.MISP_API_KEY, config.MISP_VERIFY_CERT)
 	
 except requests.exceptions.ConnectionError as e:
 	print(f"Failed to connect to MISP Server: (check URL): {e}")
@@ -41,51 +41,51 @@ except Exception as e:
 	print(f"Failed to connect to MISP Server: An unexpected error occurred: {e}")
 	sys.exit(1)
 	
-# ---- Check if AUTO_GENERATE_NEW_EVENT exists in config and if it doesn't them define it as False
+# ---- Check if config.AUTO_GENERATE_NEW_EVENT exists in config and if it doesn't them define it as False
 try:
-	LOCAL_AUTO_GENERATE_NEW_EVENT = AUTO_GENERATE_NEW_EVENT
+	LOCAL_AUTO_GENERATE_NEW_EVENT = config.AUTO_GENERATE_NEW_EVENT
 except NameError:
 	LOCAL_AUTO_GENERATE_NEW_EVENT = False
 
-# ---- If LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID is 0 then there is a problem
-if LOCAL_AUTO_GENERATE_NEW_EVENT is False and EVENT_ID == 0:
-	print("Config.py entries AUTO_GENERATE_NEW_EVENT = False and EVENT_ID = 0 - incorrect config - check config - exiting")
+# ---- If LOCAL_AUTO_GENERATE_NEW_EVENT is False and config.EVENT_ID is 0 then there is a problem
+if LOCAL_AUTO_GENERATE_NEW_EVENT is False and config.EVENT_ID == 0:
+	print("Config.py entries config.AUTO_GENERATE_NEW_EVENT = False and config.EVENT_ID = 0 - incorrect config - check config - exiting")
 	sys.exit(1)
 
 # ---- Generate new event if AUTO_GENERATE_NEW_EVENT is True ----
 try:
-	if AUTO_GENERATE_NEW_EVENT:
+	if config.AUTO_GENERATE_NEW_EVENT:
 		try:
-			print("AUTO_GENERATE_NEW_EVENT was True - creating new event in MISP")	
+			print("config.AUTO_GENERATE_NEW_EVENT was True - creating new event in MISP")	
 			event = MISPEvent()
 			event.info = "Imported indicators from LevelBlue Open Threat Exchange "
 			event.distribution = 0  		# Your organization only
 			event.threat_level_id = 2  		# Medium
 			event.analysis = 0  			# Initial
 			new_event = misp.add_event(event, pythonify=True)
-			EVENT_ID = new_event.id
+			config.EVENT_ID = new_event.id
 			
 		except Exception as e:
 			print(f"Failed creating new Event in MISP: Error: {e}")
 			sys.exit(1)
 	else:
-		if not isinstance(EVENT_ID, (int)):
-			print("EVENT ID is not a number and AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
+		if not isinstance(config.EVENT_ID, (int)):
+			print("config.EVENT ID is not a number and config.AUTO_GENERATE_NEW_EVENT is set to False.  Check Config")
 			sys.exit(1)
 except NameError:
-	print("AUTO_GENERATE_NEW_EVENT variable is not set in the configuration - check documentation.")
+	print("config.AUTO_GENERATE_NEW_EVENT variable is not set in the configuration - check documentation.")
 
 
 # ---- Get event with attributes ----
 try:
-	print(f"Fetching Event {EVENT_ID} from MISP")	
-	event = misp.get_event(EVENT_ID, pythonify=True)
+	print(f"Fetching Event {config.EVENT_ID} from MISP")	
+	event = misp.get_event(config.EVENT_ID, pythonify=True)
 except Exception as e:
 	print(f"Failed to get Event ID from MISP: Error: {e}")
 	sys.exit(1)
 
 # ---- Convert import DAYS into a timestamp
-import_days_tz  = datetime.now(timezone.utc) - timedelta(days=IMPORT_DAYS)
+import_days_tz  = datetime.now(timezone.utc) - timedelta(days=config.IMPORT_DAYS)
 
 # ---- Create import Types list ----
 indicator_import_list = create_indicator_import_string()
@@ -100,7 +100,7 @@ except Exception as e:
 	sys.exit(1)
 
 icount = sum(1 for _ in indicator_count)
-print(f"Processing {icount} OTX indicators into MISP Event ID: {EVENT_ID}")
+print(f"Processing {icount} OTX indicators into MISP Event ID: {config.EVENT_ID}")
 
 # ---- Enumerate the indicators and see if they exist already
 count = 0
@@ -140,10 +140,10 @@ for indicator in indicators:
 		else:
 			vt_malicious_score = 0
 
-		print("VT Malicious Score: ", vt_malicious_score , " and Threshold: ", VT_MALICIOUS_THRESHOLD, " - ", end="")
+		print("VT Malicious Score: ", vt_malicious_score , " and Threshold: ", config.VT_MALICIOUS_THRESHOLD, " - ", end="")
 
 		# ---- Check if malicious score is greater than threshold and if it is, add it.
-		if vt_malicious_score < VT_MALICIOUS_THRESHOLD:
+		if vt_malicious_score < config.VT_MALICIOUS_THRESHOLD:
 			print("VT malicious score < threshold - skipping")
 			continue
 		else:
@@ -166,7 +166,7 @@ for indicator in indicators:
 			highest_url_list_date = tz2
 
 	# ---- Calculate the decay time so we aren't putting entries in that are stale ---
-	decay_utc = datetime.now(timezone.utc) - timedelta(days=DECAY_DAYS)
+	decay_utc = datetime.now(timezone.utc) - timedelta(days=config.DECAY_DAYS)
 	decay_unixtimestamp = decay_utc.timestamp()	
 
 	# ---- Get the indicator creation time and see if it equals the MISP one
@@ -194,9 +194,9 @@ for indicator in indicators:
 			processIndicator(misp, event, "ip-dst", indicator_value, indicator_details, otx_latest_sighting, decay_unixtimestamp)
 
 
-			# ---- If ADD_IP_SRC_FOR_EACH_OTX_IP == True in config.py, add ip-src attribute in MISP
+			# ---- If config.ADD_IP_SRC_FOR_EACH_OTX_IP == True in config.py, add ip-src attribute in MISP
 			try:
-				LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP = ADD_IP_SRC_FOR_EACH_OTX_IP
+				LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP = config.ADD_IP_SRC_FOR_EACH_OTX_IP
 			except NameError:
 				LOCAL_ADD_IP_SRC_FOR_EACH_OTX_IP = False
 
@@ -208,6 +208,6 @@ for indicator in indicators:
 # ---- Publish the event ----
 print("Publishing Event")
 try:
-	misp.publish(EVENT_ID, alert=False)
+	misp.publish(config.EVENT_ID, alert=False)
 except Exception as e:
 	print(f"Failed to publish MISP event! err:{e}")
